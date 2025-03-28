@@ -1,0 +1,54 @@
+---
+title: ARTEMIS-DELFI scores predict survival for patients in CheckPAC trial
+---
+
+
+Kaplan-Meier curves of progression free survival probability and overall survival probability based on median landmark ARTEMIS-DELFI score at 8 weeks. Patients are classified as responders or non-responders if follow-up ARTEMIS-DELFI scores are below or above the median follow-up score, respectively.
+
+
+```{r packages, message = FALSE}
+library(caret)
+library(data.table)
+library(devtools)
+library(ggpubr)
+library(here)
+library(lubridate)
+library(readxl)
+library(recipes)
+library(survival)
+library(survminer)
+library(tidyverse)
+```
+
+
+```{r load_dataa}
+clean_data<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S1",range="A2:X45")
+delfi_pred<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S2",range="A2:N219")
+```
+
+
+```{r fig6b,  fig.height=6, fig.width=6, dev = c("png", "pdf")}
+delfi_pred<-delfi_pred %>% filter(Timepoint=="Endpoint", `ARTEMIS-DELFI Score`!="-")
+delfi_pred$`ARTEMIS-DELFI Score`<-as.numeric(delfi_pred$`ARTEMIS-DELFI Score`)
+DELFI_complete<-inner_join(delfi_pred,clean_data, by="Patient")
+DELFI_complete<-DELFI_complete %>% mutate(cutoff1= ifelse(`ARTEMIS-DELFI Score` >=median(`ARTEMIS-DELFI Score`), "Nonresponder", "Responder"))
+
+#DELFI_complete$Deceased<-DELFI_complete$Death
+DELFI_complete<-DELFI_complete %>% mutate(across('Death', str_replace, 'Yes', '1'))
+DELFI_complete<-DELFI_complete %>% mutate(across('Death', str_replace, 'No', '0'))
+DELFI_complete$`OS (days)`<-as.numeric(DELFI_complete$`OS (days)`)
+DELFI_complete$`PFS (days)`<-as.numeric(DELFI_complete$`PFS (days)`)
+DELFI_complete$Deceased<-as.numeric(DELFI_complete$Death)
+
+fit <- survfit(Surv(`PFS (days)`, Deceased) ~ cutoff1, data=DELFI_complete)
+ggsurvplot(fit, pval = TRUE, risk.table = TRUE, risk.table.col = "strata", surv.median.line = "hv", title="", ylab="Progression free survival probability", xlab="Time in Days", ggtheme = theme_classic2(base_size=11), legend = c(.9,.75), legend.title="", legend.labs=c("nonresponder","responder"), pval.size=3, pval.coord = c(1800, .25),tables.y.text = FALSE) 
+
+coxPFS <- coxph(Surv(`PFS (days)`, Deceased) ~ cutoff1, data = DELFI_complete)
+summary(coxPFS)
+
+fit <- survfit(Surv(`OS (days)`, Deceased) ~ cutoff1, data=DELFI_complete)
+ggsurvplot(fit, pval = TRUE, risk.table = TRUE, risk.table.col = "strata", surv.median.line = "hv", title="", xlab="Time in Days", ylab="Overall survival probability", ggtheme = theme_classic2(base_size=11), legend = c(.9,.75), legend.title="", legend.labs=c("nonresponder","responder"), pval.size=3, pval.coord = c(1800, .25),tables.y.text = FALSE) 
+
+coxOS <- coxph(Surv(`OS (days)`, Deceased) ~ cutoff1, data = DELFI_complete)
+summary(coxOS)
+```

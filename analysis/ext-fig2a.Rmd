@@ -1,0 +1,75 @@
+---
+title: Selection of post-treatment liquid biopsy timepoint for molecular analyses
+---
+
+
+Time distribution of each blood draw in CheckPAC and PACTO studies.
+
+
+```{r load_packages, message = FALSE}
+library(data.table)
+library(here)
+library(lubridate)
+library(readxl)
+library(tidyverse)
+```
+
+```{r load_data}
+supplementary_checkpac <- read_excel(here("data/supplementary_tables.xlsx"),
+                                     sheet = "Table S2", range = "A2:M219")
+supplementary_pacto <- read_excel(here("data/supplementary_tables.xlsx"),
+                                  sheet = "Table S5", range = "A2:L207")
+
+```
+
+
+```{r list_visits}
+# Keep first four visits for CheckPAC
+dates_checkpac <- supplementary_checkpac %>%
+  mutate(Visit = str_extract(Sample, "(?<=CGPLPA[0-9]{1,10}P)[\b0-9]{1,2}")) %>%
+  mutate(Visit = as.numeric(Visit)) %>%
+  replace_na(list(Visit = 0)) %>%
+  filter(Visit %in% c(0:3)) %>%
+  mutate(tp = case_when(Visit == 0 ~ "Baseline",
+                        Visit == 1 ~ "Cycle 1",
+                        Visit == 2 ~ "Endpoint",
+                        Visit == 3 ~ "Follow-up"))
+# Print median days from treatment
+dates_checkpac %>%
+  group_by(tp) %>%
+  summarize(`Days from Tx init` = median(`Days from Treatment Initiation`))
+
+# Keep first four visit for PACTO
+dates_pacto <- supplementary_pacto %>%
+  mutate(Visit = str_extract(Sample, "(?<=CGPLPA[0-9]{1,10}P)[\b0-9]{1,2}")) %>%
+  mutate(Visit = as.numeric(Visit)) %>%
+  replace_na(list(Visit = 0)) %>%
+  filter(Visit %in% c(0:3)) %>%
+  mutate(tp = case_when(Visit == 0 ~ "Baseline",
+                        Visit == 1 ~ "Cycle 1",
+                        Visit == 2 ~ "Endpoint",
+                        Visit == 3 ~ "Follow-up"))
+# Print median days from treatment
+dates_pacto %>%
+  group_by(tp) %>%
+  summarize(`Days from Tx init` = median(`Days from Treatment Initiation`))
+
+# Combine data
+checkpac_dates_full <- dates_checkpac %>%
+  mutate(Trial = "CHECKPAC") %>%
+  select(Sample, `Days from Treatment Initiation`, tp, Trial)
+pacto_dates_full <- dates_pacto %>%
+  mutate(Trial = "PACTO") %>%
+  select(Sample, `Days from Treatment Initiation`, tp, Trial)
+alldates_pacto_checkpac <- bind_rows(pacto_dates_full,
+                                     checkpac_dates_full)
+```
+
+
+```{r ext-fig2a, fig.width = 8, fig.height = 4, dev = c("png", "pdf")}
+ggplot(alldates_pacto_checkpac,
+       aes(tp, `Days from Treatment Initiation`, fill = Trial)) +
+  geom_boxplot() +
+  ylab("Days from baseline") + xlab("Draws") +
+  theme_classic()
+```

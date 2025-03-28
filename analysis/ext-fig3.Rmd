@@ -1,0 +1,16 @@
+---
+title: Overview of WGMAF method 
+---
+
+
+For each sample, the tumor and matched normal WGS provided a set of somatic mutations for evaluation. From this set, the WGMAF score is defined as the sum of mutated observations across all observations at these positions. This score is used to estimate MAF for each sample.
+
+
+```{r packages, message = FALSE}
+library(here)
+```
+
+
+```{r ext-fig3, echo=FALSE, out.width = "100%"}
+knitr::include_graphics("assets/ext-fig3.png", error = FALSE)
+```

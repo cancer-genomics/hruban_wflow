@@ -1,0 +1,244 @@
+---
+title: Longitudinal evaluation of patient response to treatment in CheckPAC trial using imaging and liquid biopsies
+---
+
+
+Response to treatment is shown for all patients. Patient clinical paths are shown in the top panels, followed by methodologies monitor response to treatment. For the top panels, patient treatment is indicated in the top two rows, radiologic assessments are plotted in the third row and last follow up is indicated in the fourth row.  Sum of target lesions were assessed from standard of care CT scans. Available WGMAF, targeted MAF, and ARTEMIS-DELFI scores are plotted for each of the blood draw timepoints. CA19-9 was measured clinically at regular intervals throughout treatment.
+
+
+```{r packages, message = FALSE}
+library(here)
+library(tidyverse)
+library(readxl)
+library(patchwork)
+library(pdftools)
+```
+
+
+```{r load_data}
+# Reading in the ID conversion table
+id.df<-read_excel(here("data/i07_input.xlsx"), sheet="ID_comparison", na = "#NULL!")
+id.df$patient_id <- gsub("P$|P1$", "", id.df$CGID)
+id.df$StudySubjectID<-as.numeric(id.df$StudySubjectID)
+
+# Reading in a clinical metadata file and extracting the date of radiation, ipi, and nivo
+clin.df<-read_excel(here("data/i07_input.xlsx"), sheet="CheckPAC_DATA4", na = "#NULL!")
+
+clin.df$StudySubjectID<-as.numeric(clin.df$StudySubjectID)
+clin.df$Survival_status<-as.numeric(clin.df$Survival_status)
+
+tx_dates.df <- left_join(id.df, clin.df, by = "StudySubjectID") %>%
+                 mutate(immunotx_start_date1 = pmin(Nivo_StartDate, Ipi_StartDate, na.rm = T),
+                        immunotx_end_date1 = pmax(Nivo_LastDate, Ipi_LastDate, na.rm = T),
+                        immunotx_start_date2 = pmin(Nivo_ReStart, Ipi_ReStart, na.rm = T),
+                        immunotx_end_date2 = pmax(Nivo_ReStop, Ipi_ReStop, na.rm = T)) %>%
+                 select(patient_id, radiation_date = Radiation_Date,
+                        immunotx_start_date1, immunotx_end_date1, immunotx_start_date2, immunotx_end_date2) %>%
+                 mutate(across(contains("date"), as.Date))
+# Extracting date of death
+survival.df <- left_join(id.df, clin.df, by = "StudySubjectID") %>%
+                 select(patient_id, date = Survival_date, status = Survival_status) %>%
+                 mutate(date = as.Date(date),
+                        status = ifelse(status == 2, "Deceased", "Alive")) %>%
+                 mutate(status = factor(status, levels = c("Alive", "Deceased"))) %>%
+              mutate(date = as.Date(date, format = "%m/%d/%Y"))
+
+# Reading in TMB for 34 samples with T/N/plasma WGS sequencing
+tmb.df <- read_excel(here("data/i07_input.xlsx"), sheet="tumor_tmb", na = "#NULL!") %>%
+            mutate(summary = paste0("Number of SBS mutations by WGS in tumor tissue (unfiltered, filtered): ", sbs.tmb, ", ", sbs.tmb.filtered))
+
+# Reading in the patient samples summary that indicates if T/N/plasma WGS is available for each patient
+wgs_patient_sample_summary.df <- read_excel(here("data/i07_input.xlsx"), sheet="patient_summary", na = "#NULL!") %>%
+                                   mutate(summary = paste0("WGS data: Tumor (", tumor_tissue, "), Normal (", normal_tissue, "), Plasma (", plasma_100bp, " timepoints)"))
+
+# Reading in DELFI scores
+delfi.df <- read_excel(here("data/i07_input.xlsx"), sheet="checkpac_preds", na = "#NULL!") %>%
+              rename(plasma_id = id, patient_id = Patient, score = 'ARTEMIS-DELFI Score') %>%
+                mutate(date = as.Date(date, format = "%m/%d/%Y"))
+
+# Reading in WGS MAFs
+wgs_maf.df <- read_excel(here("data/i07_input.xlsx"), sheet="plasma_mafs", na = "#NULL!") %>%
+                rename(date = "date_blood_draw") %>% mutate(date = as.Date(date, format = "%m/%d/%Y")) %>%
+  filter(plasma_read_length!="150")
+
+# Reading in targeted sequencing MAFs
+targeted_maf.df <- read_excel(here("data/i07_input.xlsx"), sheet="targeted_sequencing", na = "#NULL!") %>%
+                     mutate(date = as.Date(date_blood_draw, format = "%m/%d/%Y")) %>%
+                     select(patient_id, date, mutation, maf)
+
+# Reading in CA-19-9 measurements
+ca19.df <- read_excel(here("data/i07_input.xlsx"), sheet="CA19-9", na = "#NULL!") %>%
+             left_join(., id.df, by = c("biopac_id" = "Biopac ID")) %>%
+             mutate(date = as.Date(date_blood_draw, format = "%m/%d/%Y")) %>%
+             select(patient_id, date, ca19_9)
+
+# Reading in RECIST response information
+recist.df <- read_excel(here("data/i07_input.xlsx"), sheet="RECIST", na = "#NULL!") %>%
+               left_join(., id.df, by = c("biopac_id" = "Biopac ID")) %>%
+               mutate(date = as.Date(date_ct, format = "%m/%d/%Y")) %>%
+               select(patient_id, date, sum_target_lesions, recist_response) %>%
+               mutate(recist_response = ifelse(is.na(recist_response), "Baseline", recist_response)) %>%
+               mutate(recist_response = factor(recist_response, levels = c("Baseline", "PR", "SD", "PD")))
+recist.df$sum_target_lesions<-as.numeric(recist.df$sum_target_lesions)
+
+# Getting the dates of the first / last measurements to be plotted for each patient
+date_range.df <- bind_rows(pivot_longer(tx_dates.df, !patient_id, names_to = NULL, values_to = "date", values_drop_na = T),
+                           select(survival.df, c(patient_id, date)),
+                           select(delfi.df, c(patient_id, date)),
+                           select(wgs_maf.df, c(patient_id, date)),
+                           select(targeted_maf.df, c(patient_id, date)),
+                           select(ca19.df, c(patient_id, date)),
+                           select(recist.df, c(patient_id, date))) %>%
+                   group_by(patient_id) %>%
+                   summarise(date_initial = min(date),
+                             date_final = max(date))
+```
+
+
+```{r ext-fig19, fig.width = 11, fig.height = 14, dev = c("png", "pdf")}
+# Generating a figure of cfDNA  metrics, ca19-9,  and clinical information for each patient
+patient_ids <- id.df$patient_id
+
+for (i in 1:length(patient_ids)) {
+
+  date_range.df.i <- filter(date_range.df, patient_id == patient_ids[i])
+  date_initial.i <- date_range.df.i$date_initial
+  date_final.i <- date_range.df.i$date_final
+
+  # Clinical information
+  recist.df.i <- filter(recist.df, patient_id == patient_ids[i])
+  recist.df.i$recist_response<-as.factor(recist.df.i$recist_response)
+  tx_dates.df.i <- filter(tx_dates.df, patient_id == patient_ids[i])
+  survival.df.i <- filter(survival.df, patient_id == patient_ids[i])
+  survival.df.i$status<-as.factor(survival.df.i$status)
+
+  p.clinical <- ggplot() +
+                  geom_point(data = NULL, aes(x = tx_dates.df.i$radiation_date, y = 1.75), color = "black", shape = 4, size = 4) +
+                  geom_rect(data = NULL, aes(xmin = tx_dates.df.i$immunotx_start_date1, xmax = tx_dates.df.i$immunotx_end_date1, ymin = 1.3125, ymax = 1.4375), color = NA, fill = "steelblue", alpha = 0.5) +
+                  geom_rect(data = NULL, aes(xmin = tx_dates.df.i$immunotx_start_date2, xmax = tx_dates.df.i$immunotx_end_date2, ymin = 1.3125, ymax = 1.4375), color = NA, fill = "steelblue", alpha = 0.5) +
+                  geom_point(data = survival.df.i, aes(x = date, y = 0.625, shape = status), size = 4) +
+                  cowplot::theme_cowplot() +
+                  theme(axis.title.y = element_blank(),
+                        axis.line.y = element_blank(),
+                        axis.ticks.y = element_blank(),
+                        axis.title.x = element_blank()) +
+                  scale_color_manual(name = "RECIST 1.1",
+                                     breaks = c("Baseline", "PR", "SD", "PD"),
+                                     values  = c("grey65", "#449c52", "#e8b82a", "#9c3b3b"),
+                                     drop = F) +
+                  scale_shape_manual(name = "Survival at last follow up",
+                                     breaks = c("Alive", "Deceased"),
+                                     values = c(2, 6),
+                                     drop = F) +
+                  xlab("Date") +
+                  coord_cartesian(xlim = c(date_initial.i, date_final.i), ylim = c(0.375, 2)) +
+                  scale_y_continuous(breaks = c(0.625, 1, 1.375, 1.75), labels = c("Last follow up", "CT scan", "Immunotherapy", "Radiation")) +
+                  scale_x_date(position = "top")
+
+  # Add CT scan / RECIST information for patients that have it
+  if (nrow(recist.df.i) > 0) {
+    p.clinical <- p.clinical +
+                    geom_point(data = recist.df.i,
+                               aes(x = date, y = 1, color = recist_response),
+                               size = 4
+                           #    ,show.legend = FALSE
+                               ) + #ADDED-LG
+                    guides(color = guide_legend(order = 1), shape = guide_legend(order = 2))
+  }
+
+  # Sum target lesions
+  p.sum_target_lesions <- ggplot(recist.df.i, aes(x = date, y = sum_target_lesions)) +
+                            geom_line() +
+                            geom_point() +
+                            cowplot::theme_cowplot() +
+                            theme(axis.title.y = element_text(angle = 0, vjust = 0.5, margin = margin(r = -45, unit = "pt")),
+                                  axis.title.x = element_blank(),
+                                  axis.ticks.x = element_blank(),
+                                  axis.text.x = element_blank()) +
+                           ylab("Sum of\ntarget\nlesions\n(mm)") +
+                           xlab("Date") +
+                           coord_cartesian(xlim = c(date_initial.i, date_final.i))
+
+  # ARTEMIS-DELFI scores
+  delfi.df.i <- filter(delfi.df, patient_id == patient_ids[i])
+  p.delfi <- ggplot(delfi.df.i, aes(x = date, y = score)) +
+               geom_line() +
+               geom_point() +
+               cowplot::theme_cowplot() +
+               theme(axis.title.y = element_text(angle = 0, vjust = 0.5, margin = margin(r = -45, unit = "pt")),
+                     axis.title.x = element_blank(),
+                     axis.ticks.x = element_blank(),
+                     axis.text.x = element_blank()) +
+               ylab("ARTEMIS-DELFI score") +
+               xlab("Date") +
+               coord_cartesian(xlim = c(date_initial.i, date_final.i), ylim = c(0, 1)) +
+               scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), labels = c("0", "0.2", "0.4", "0.6", "0.8", "1"))
+
+  # WGS MAFs
+  wgs_maf.df.i <- filter(wgs_maf.df, patient_id == patient_ids[i])
+  p.wgs_maf <- ggplot(wgs_maf.df.i, aes(x = date, y = mf * 100)) +
+                 geom_line() +
+                 geom_point() +
+                 cowplot::theme_cowplot() +
+                 theme(axis.title.y = element_text(angle = 0, vjust = 0.5, margin = margin(r = -45, unit = "pt")),
+                       axis.title.x = element_blank(),
+                       axis.ticks.x = element_blank(),
+                       axis.text.x = element_blank()) +
+                 ylab("WGMAF\n(%)") +
+                 xlab("Date") +
+                 coord_cartesian(xlim = c(date_initial.i, date_final.i))
+
+  # Targeted MAFs
+  targeted_maf.df.i <- filter(targeted_maf.df, patient_id == patient_ids[i])
+  p.targeted_maf <- ggplot(targeted_maf.df.i, aes(x = date, y = maf * 100, group = mutation, color = mutation)) +
+                      geom_line() +
+                      geom_point() +
+                      cowplot::theme_cowplot() +
+                      theme(axis.title.y = element_text(angle = 0, vjust = 0.5, margin = margin(r = -45, unit = "pt")),
+                            axis.title.x = element_blank(),
+                            axis.ticks.x = element_blank(),
+                            axis.text.x = element_blank()) +
+                      scale_color_brewer(name = "Mutation", palette = "Dark2") +
+                      ylab("Targeted MAF\n(%)") +
+                      xlab("Date") +
+                      coord_cartesian(xlim = c(date_initial.i, date_final.i))
+
+  # CA-19-9 levels
+  ca19.df.i <- filter(ca19.df, patient_id == patient_ids[i])
+  p.ca19 <- ggplot(ca19.df.i, aes(x = date, y = ca19_9)) +
+              geom_point() +
+              geom_line() +
+              cowplot::theme_cowplot() +
+              theme(axis.title.y = element_text(angle = 0, vjust = 0.5, margin = margin(r = -45, unit = "pt")),
+                    axis.title.x = element_blank())+
+              ylab("CA 19-9\n(U/mL)") +
+              xlab("Date") +
+              coord_cartesian(xlim = c(date_initial.i, date_final.i))
+
+   # Plot title information
+   tmb.df.i <- filter(tmb.df, patient_id == patient_ids[i])
+   wgs_patient_sample_summary.df.i <- filter(wgs_patient_sample_summary.df, patient_id == patient_ids[i])
+   plot.title.i <- paste0(patient_ids[i], "\n",
+                          ifelse(nrow(wgs_patient_sample_summary.df.i) > 0, wgs_patient_sample_summary.df.i$summary, "WGS data: Tumor (No), Normal (No), Plasma (0 timepoints)"), "\n",
+                          ifelse(nrow(tmb.df.i) > 0, tmb.df.i$summary, "Number of SBS mutations by WGS in tumor tissue (unfiltered, filtered): not measured"))
+
+   p.patient.i <- p.clinical / p.sum_target_lesions /p.wgs_maf / p.targeted_maf / p.delfi /  p.ca19 +
+                   plot_layout(heights = c(1.15, 0.75, 0.75, 0.75, 0.75, 0.75)) +
+                   plot_annotation(title = plot.title.i,
+                                   theme = theme(plot.title = element_text(hjust = 0.5, size = 14)))
+
+  print(p.patient.i)
+}
+```
+
+
+```{r combine_pdf}
+if (dir.exists(here("docs/figure/ext-fig19.Rmd"))) {
+  if (file.exists(here("docs/figure/ext-fig19.Rmd/ext-fig19comb.pdf"))) {
+    file.remove(here("docs/figure/ext-fig19.Rmd/ext-fig19comb.pdf"))
+  }
+  pdf_combine(list.files(here("docs/figure/ext-fig19.Rmd"), full.names = TRUE,
+                         pattern = "pdf"),
+              output = here("docs/figure/ext-fig19.Rmd/ext-fig19comb.pdf"))
+}
+```

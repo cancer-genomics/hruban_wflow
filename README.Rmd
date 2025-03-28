@@ -1,0 +1,101 @@
+---
+title: Genome-wide analyses of cell-free DNA for therapeutic monitoring of patients with pancreatic cancer
+author: Carolyn Hruban
+output:
+  md_document:
+    variant: markdown_github
+---
+
+# README
+
+The data used in this analysis originates from the [CheckPAC](https://www.clinicaltrials.gov/study/NCT02866383) and [PACTO](https://clinicaltrials.gov/study/NCT02767557) trials. 
+
+The CRAM files associated with these datasets have been deposited in the European Genome-phenome Archive (EGA):
+
+- **Study ID** EGAS50000000923
+- **Dataset ID** EGAD50000001353
+
+## Overview
+
+This repository was used to generate the [figures](https://cancer-genomics.github.io/hruban_wflow/index.html) for the associated manuscript.
+
+## Reproducing the Figures
+
+Clone the Repository:
+```{sh, eval = FALSE}
+git clone https://github.com/cancer-genomics/hruban_wflow
+```
+
+Navigate to the Repository Directory:
+```{sh, eval = FALSE}
+cd hruban_wflow
+```
+
+Render the README File (ensure that eval is set to TRUE in the code chunks):
+```{sh, eval = FALSE}
+Rscript -e 'rmarkdown::render("README.Rmd")'
+```
+  
+## Required Packages
+
+The following R packages are required for this analysis. Setting eval = TRUE during the rendering process will ensure they are installed:
+
+```{r install_packages, message = FALSE, warning = FALSE, eval = FALSE}
+options(repos = structure(c(CRAN = "getCRANmirrors()$URL[1]")))
+BiocManager::install("ComplexHeatmap")
+BiocManager::install("VplotR")
+install.packages("RColorBrewer")
+install.packages("caret")
+install.packages("circlize")
+install.packages("cowplot")
+install.packages("data.table")
+install.packages("forcats")
+install.packages("fs")
+install.packages("glmnet")
+install.packages("ggpubr")
+install.packages("ggstance")
+install.packages("gridExtra")
+install.packages("gridGraphics")
+install.packages("here")
+install.packages("lubridate")
+install.packages("matrixStats")
+install.packages("openxlsx")
+install.packages("plotly")
+install.packages("readxl")
+install.packages("recipes")
+install.packages("rstatix")
+install.packages("scales")
+install.packages("survival")
+install.packages("survminer")
+install.packages("tidyverse")
+install.packages("viridis")
+```
+
+## Pipelines Used
+
+The pipelines used in this publication are either included in this repository or have been published previously:
+
+- **WGMAF** - Located in `code/wgmaf_code` 
+- **DELFI pipeline** - [GitHub Repository](https://github.com/cancer-genomics/delfi3)
+- **ARTEMIS-DELFI model** - [Annapragada, AV. et al (2024)](https://www.science.org/doi/10.1126/scitranslmed.adj9283)
+- **DELFI TF model** - [van’t Erve, I. et al (2024)](https://doi.org/10.1038/s41467-024-53017-7)
+
+## Directory Structure
+This repository follows the [workflowr](https://github.com/workflowr/workflowr) project structure.
+
+`analysis/` - Contains the scripts needed to reproduce the manuscript figures. These can be rebuilt using the following command:
+
+```{r rebuild_figs, eval = FALSE}
+library(workflowr)
+wflow_build("analysis/*.Rmd")
+```
+
+`code/` - Contains scripts required to generate intermediate objects that are later loaded by the `analysis/` scripts. Some of these may need to be run on a high-performance computing cluster.
+
+`data/` - Contains intermediate data objects used in the analysis.
+
+`extdata/` - Not included due to size restrictions. This directory contains two files:
+
+`hic_compartments_100kb_ebv_2014.txt`: Downloaded from [GitHub repository](https://github.com/Jfortin1/HiC_AB_Compartments)
+
+`paad_betas_100kb.csv`: PDAC A/B compartments were generated from TCGA methylation data according to [Fortin, JP. et al (2015)](https://doi.org/10.1186/s13059-015-0741-y) 

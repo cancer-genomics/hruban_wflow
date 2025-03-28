@@ -1,0 +1,116 @@
+﻿labid,gene,pathways,type,Best.Overall.Survival,Survival
+CGPLPA223,MLH1,MMR,substitution,Partial reponse,1511
+CGPLPA223,NOTCH2,NOTCH,substitution,Partial reponse,1511
+CGPLPA223,ROCK2,other,substitution,Partial reponse,1511
+CGPLPA223,TP53,other,deletion,Partial reponse,1511
+CGPLPA223,IRS1,PI3K,deletion,Partial reponse,1511
+CGPLPA223,IRS2,PI3K,substitution,Partial reponse,1511
+CGPLPA223,PTEN,PI3K,deletion,Partial reponse,1511
+CGPLPA223,STK11,PI3K,deletion,Partial reponse,1511
+CGPLPA223,ARAF,ras,substitution,Partial reponse,1511
+CGPLPA223,BRAF,ras,deletion,Partial reponse,1511
+CGPLPA223,RASA1,ras,deletion,Partial reponse,1511
+CGPLPA223,RASA2,ras,deletion,Partial reponse,1511
+CGPLPA223,RASSF8,ras,substitution,Partial reponse,1511
+CGPLPA223,SHOC2,ras,substitution,Partial reponse,1511
+CGPLPA223,TGFBR2,TGFBR,deletion,Partial reponse,1511
+CGPLPA223,ERBB2,TK receptors,deletion,Partial reponse,1511
+CGPLPA223,FLT3,TK receptors,substitution,Partial reponse,1511
+CGPLPA223,CTNNB1,WNT,substitution,Partial reponse,1511
+CGPLPA223,RNF43,WNT,deletion,Partial reponse,1511
+CGPLPA223,APC,WNT,insertion,Partial reponse,1511
+CGPLPA224,TP53,other,substitution,Partial reponse,1470
+CGPLPA224,IRS1,PI3K,substitution,Partial reponse,1470
+CGPLPA224,PTEN,PI3K,substitution,Partial reponse,1470
+CGPLPA224,KRAS,ras,substitution,Partial reponse,1470
+CGPLPA224,BRAF,ras,substitution,Partial reponse,1470
+CGPLPA224,RASGRF1,ras,substitution,Partial reponse,1470
+CGPLPA224,SMAD4,TGFBR,substitution,Partial reponse,1470
+CGPLPA224,APC,WNT,substitution,Partial reponse,1470
+CGPLPA789,CDKN2A,Cell cycle,deletion,Partial reponse,610
+CGPLPA789,TP53,other,substitution,Partial reponse,610
+CGPLPA789,KRAS,ras,substitution,Partial reponse,610
+CGPLPA789,SMAD7,TGFBR,insertion,Partial reponse,610
+CGPLPA789,ACVR1B,TGFBR,deletion,Partial reponse,610
+CGPLPA797,KRAS,ras,substitution,Progressive Disease,518
+CGPLPA797,CNKSR2,ras,deletion,Progressive Disease,518
+CGPLPA797,GRB2,ras,substitution,Progressive Disease,518
+CGPLPA790,TP53,other,substitution,Stable disease,465
+CGPLPA787,RB1,Cell cycle,insertion,Partial reponse,418
+CGPLPA787,RAD52,other,substitution,Partial reponse,418
+CGPLPA787,TP53,other,substitution,Partial reponse,418
+CGPLPA787,KRAS,ras,substitution,Partial reponse,418
+CGPLPA787,TGFB2,TGFBR,substitution,Partial reponse,418
+CGPLPA787,ACVR1C,TGFBR,substitution,Partial reponse,418
+CGPLPA794,ARID1A,chromatin regulating,substitution,Partial reponse,332
+CGPLPA794,NOTCH2,NOTCH,substitution,Partial reponse,332
+CGPLPA794,TP53,other,substitution,Partial reponse,332
+CGPLPA794,KRAS,ras,substitution,Partial reponse,332
+CGPLPA794,TGFB1,TGFBR,substitution,Partial reponse,332
+CGPLPA217,PARP1,BRCA,substitution,Stable disease,306
+CGPLPA217,ARID1A,chromatin regulating,substitution,Stable disease,306
+CGPLPA217,TP53,other,substitution,Stable disease,306
+CGPLPA217,KRAS,ras,substitution,Stable disease,306
+CGPLPA779,ROCK2,other,substitution,Progressive Disease,257
+CGPLPA779,RASGRP4,ras,substitution,Progressive Disease,257
+CGPLPA779,SPRY2,ras,substitution,Progressive Disease,257
+CGPLPA767,TP53,other,substitution,Stable disease,233
+CGPLPA767,APC,WNT,insertion,Stable disease,233
+CGPLPA768,MRAS,ras,substitution,Not evaluable,232
+CGPLPA768,SMAD4,TGFBR,substitution,Not evaluable,232
+CGPLPA768,FZD2,WNT,substitution,Not evaluable,232
+CGPLPA219,CDKN2A,Cell cycle,substitution,Stable disease,227
+CGPLPA219,TP53,other,substitution,Stable disease,227
+CGPLPA219,KRAS,ras,substitution,Stable disease,227
+CGPLPA788,BUB1,Cell cycle,substitution,Progressive Disease,220
+CGPLPA788,KRAS,ras,substitution,Progressive Disease,220
+CGPLPA781,ARID1A,chromatin regulating,deletion,Progressive Disease,203
+CGPLPA781,APAF1,other,substitution,Progressive Disease,203
+CGPLPA781,TP53,other,substitution,Progressive Disease,203
+CGPLPA781,PIK3CG,PI3K,substitution,Progressive Disease,203
+CGPLPA781,KRAS,ras,substitution,Progressive Disease,203
+CGPLPA781,CNKSR2,ras,deletion,Progressive Disease,203
+CGPLPA775,CREBBP,chromatin regulating,insertion,Stable disease,172
+CGPLPA775,SMARCA4,chromatin regulating,substitution,Stable disease,172
+CGPLPA775,TP53,other,deletion,Stable disease,172
+CGPLPA775,KRAS,ras,substitution,Stable disease,172
+CGPLPA775,DAB2IP,ras,substitution,Stable disease,172
+CGPLPA795,TP53,other,substitution,Progressive Disease,156
+CGPLPA795,KRAS,ras,substitution,Progressive Disease,156
+CGPLPA786,TP53,other,substitution,Progressive Disease,130
+CGPLPA786,KRAS,ras,substitution,Progressive Disease,130
+CGPLPA220,RB1,Cell cycle,deletion,Stable disease,122
+CGPLPA220,MAP2K4,kras,deletion,Stable disease,122
+CGPLPA220,TP53,other,substitution,Stable disease,122
+CGPLPA220,IRS1,PI3K,substitution,Stable disease,122
+CGPLPA220,KRAS,ras,substitution,Stable disease,122
+CGPLPA220,RASAL2,ras,substitution,Stable disease,122
+CGPLPA220,ALK,TK receptors,substitution,Stable disease,122
+CGPLPA774,NFKB1,other,insertion,Progressive Disease,121
+CGPLPA774,TP53,other,substitution,Progressive Disease,121
+CGPLPA774,KRAS,ras,substitution,Progressive Disease,121
+CGPLPA774,RASGRP1,ras,substitution,Progressive Disease,121
+CGPLPA780,TP53,other,insertion,Progressive Disease,119
+CGPLPA780,KRAS,ras,substitution,Progressive Disease,119
+CGPLPA780,CNKSR1,ras,substitution,Progressive Disease,119
+CGPLPA780,PDGFRA,TK receptors,substitution,Progressive Disease,119
+CGPLPA221,CDKN2A,Cell cycle,substitution,Stable disease,102
+CGPLPA221,KRAS,ras,substitution,Stable disease,102
+CGPLPA772,TP53,other,substitution,Progressive Disease,96
+CGPLPA772,KRAS,ras,substitution,Progressive Disease,96
+CGPLPA772,SMAD4,TGFBR,insertion,Progressive Disease,96
+CGPLPA218,CDKN2A,Cell cycle,substitution,Progressive Disease,92
+CGPLPA218,KRAS,ras,substitution,Progressive Disease,92
+CGPLPA783,TP53,other,substitution,Progressive Disease,78
+CGPLPA783,KRAS,ras,substitution,Progressive Disease,78
+CGPLPA783,TCF7,WNT,substitution,Progressive Disease,78
+CGPLPA769,MAP2K4,kras,substitution,Progressive Disease,58
+CGPLPA769,TP53,other,substitution,Progressive Disease,58
+CGPLPA769,KRAS,ras,substitution,Progressive Disease,58
+CGPLPA769,APC,WNT,substitution,Progressive Disease,58
+CGPLPA785,TP53,other,substitution,Progressive Disease,56
+CGPLPA785,KRAS,ras,substitution,Progressive Disease,56
+CGPLPA765,TP53,other,deletion,Not evaluable,39
+CGPLPA765,KRAS,ras,substitution,Not evaluable,39
+CGPLPA766,KRAS,ras,substitution,Not evaluable,37
+CGPLPA766,ERBB4,TK receptors,substitution,Not evaluable,37

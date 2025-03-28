@@ -1,0 +1,197 @@
+---
+title: DELFI features correlate with clinical response of patients in PACTO cohort
+---
+
+
+The vertical axis is categorized by all patients with plasma samples at baseline, and at follow-up for each of the clinical RECIST 1.1 response categories and sorted by ARTEMIS-DELFI scores in descending order. All molecular features evaluated are plotted along the horizontal axis and colored by feature type. The heatmap color scale reflects the deviation of cfDNA features as compared to the mean of 10 non-cancer individuals.
+
+
+```{r packages, message=FALSE}
+library(tidyverse)
+library(openxlsx)
+library(devtools)
+library(ComplexHeatmap)
+library(circlize)
+library(data.table)
+library(here)
+library(scales)
+library(viridis)
+library(readxl)
+load_all(here("code/rlucas"))
+```
+
+
+```{r load_data, message = FALSE}
+# Load metadata
+clean_data <- read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S4",range="A2:S42")
+dm.meta <- read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S5",range="A2:N207")
+
+# Load DELFI features
+features <- read_csv(here("data/pacto_features.csv"))
+bins5mb2<-read_csv(here("data/pacto_bins.csv"))
+
+# Load ARTEMIS features
+artemis <- as_tibble(read_xlsx(here("data/CP_PAC_artemis.xlsx"), sheet="PACartemis")) 
+e <- fread(here("data/Expected.csv"))
+epi <- read_csv(here("data/Checkpac_Test.csv"))
+```
+
+
+```{r sample.set.annotation, echo = FALSE}
+dm.meta$StudySubjectID<-dm.meta$`Study ID`
+dm.meta<-left_join(dm.meta, clean_data, by="Patient")
+dm.meta$id<-dm.meta$Sample
+dm.meta <- dm.meta %>% 
+    filter(`BOR RECIST 1.1`!= 'Not Evaluable')
+dm.meta <- dm.meta %>% 
+    filter(Timepoint!= 'follow up', Timepoint!= "cycle 1")
+dm.meta<-dm.meta %>% mutate('Category'= case_when((Timepoint=="Baseline") ~ "Baseline",
+                                                  (`BOR RECIST 1.1`=="Progressive Disease") ~ "Progressive Disease",
+                                                  (`BOR RECIST 1.1`== "Stable Disease") ~ 'Stable Disease',
+                                                  (`BOR RECIST 1.1`== "Partial Response")~"Partial Response"))
+```
+
+```{r heatmap.body}
+meta<-dm.meta %>% mutate('type'= case_when((Category == 'Baseline') ~ 'PACTO Baseline',
+                                     (Category== 'Partial Response') ~ 'PACTO Endpoint Partial Response',
+                                     (Category== 'Stable Disease') ~ 'PACTO Endpoint Stable Disease',
+                                     (Category=='Progressive Disease') ~'PACTO Endpoint Progressive Disease'))
+meta<-meta %>% select(id, type)
+dat<-inner_join(artemis, meta %>% select(id,type),by="id")
+
+e<-e %>% filter(total_kmers>1000)
+e$fam<-sapply(str_split(e$feature,"#"),"[",2)
+e$fam<-sapply(str_split(e$fam,"_"),"[",1)
+e<-e %>% mutate(fam=if_else(fam %in% c("rRNA","snRNA","scRNA","tRNA","srpRNA"),"TE",fam))
+e<-e %>% mutate(fam=if_else(fam %in% c("DNA","DNA?","RC","Retroposon"),"TE",fam))
+e<-e %>% mutate(fam=if_else(fam %in% "SINE","TE",fam))
+e<-e %>% mutate(fam=if_else(is.na(fam),"Satellite",fam))
+
+artemis<-dat %>% select(id,type,e$feature)
+test<-artemis %>% gather(key=feature,value=count,-id,-type)
+test<-inner_join(test,e %>% select(feature,fam),by="feature")
+test<-inner_join(test,e %>% select(feature,fam,total_kmers),by="feature")
+test<-test %>% group_by(id,fam.x,type) %>% summarize(c=scale(count)[,1],f=feature)
+artemis<-test
+artemis[,c('fam.x', "type")] <- NULL
+
+artemishelp<-artemis %>%
+    pivot_wider(names_from = f, values_from = c)
+
+
+epi1<-select(epi,contains(c("id","H3K","H4K","states")))
+
+artemishelp<-inner_join(artemishelp,epi1, by= "id")
+
+multinucs <- bins5mb2 %>% group_by(id) %>% summarize(multinucratio = sum(multinucs)/(sum(short+long)))
+
+features <- inner_join(multinucs, features, by="id")
+
+features<-inner_join(features, artemishelp, by="id")
+
+labels <- dm.meta
+features <- inner_join(labels, features, by=c("id"="id"))
+
+dna_features <- features %>% select(36:1880)
+
+
+dna_features <- as.matrix(dna_features)
+dna_features <- apply(dna_features, 2, scale)
+rownames(dna_features) <- features$id
+```
+
+```{r sample.annotation, echo=FALSE}
+sample_annot <- features %>% select(id, 'Category', `PFS (days)`, `OS (days)`,`ARTEMIS-DELFI Score`)
+
+sample_annot <- data.frame(sample_annot)
+sample_annot[sample_annot == "NA"] <- "Unknown"
+rownames(sample_annot) <- sample_annot$id
+sample_annot$id <- NULL
+sample_annot<-sample_annot %>% mutate('Treatment response'= case_when((Category == 'Baseline') ~ 'Baseline',
+                                     (Category== 'Partial Response') ~ 'Partial Response',
+                                     (Category== 'Stable Disease') ~ 'Stable Disease',
+                                     (Category=='Progressive Disease') ~'Progressive Disease'))
+
+sample_annot<-sample_annot %>% mutate('Overall survival'= case_when((`OS..days.`<=365) ~ "<6 months",
+                                     (`OS..days.`<=365) ~ "6 months to 1 year",
+                                     (`OS..days.`<= 720) ~ '1-2 years',
+                                     (`OS..days.`<= 1460) ~ '2-3 years',
+                                     (`OS..days.`>1460) ~'3+ years'))
+sample_annot<-sample_annot %>% mutate('Progression free survival'= case_when((`PFS..days.`<=182) ~ "<6 months",
+                                     (`PFS..days.`<=365) ~ "6 months to 1 year",
+                                     (`PFS..days.`<= 720) ~ '1-2 years',
+                                     (`PFS..days.`<= 1460) ~ '2-3 years',
+                                     (`PFS..days.`>1460) ~ '3+ years'))
+sample_annot$`ARTEMIS-DELFI score`<-sample_annot$`ARTEMIS.DELFI Score`
+
+sample_annot[,c('Category', 'OS..days.','PFS..days.','DELFI.Score')]<-NULL
+```
+
+```{r feature.annotation, echo=FALSE}
+
+features_annot <- data.frame(`Features` = sapply(colnames(dna_features), function(x) str_split(x, '_')[[1]][1]))
+
+d_features_help <- features_annot
+  names <- rownames(d_features_help)
+  rownames(d_features_help) <- NULL
+  data_helpnew <- cbind(names,d_features_help)
+data_helpnew$feature<-data_helpnew$names
+bad<-left_join(data_helpnew,e, by="feature")
+
+bad[,c('names','V1',"total_kmers")] <- NULL
+
+
+features_annot<-bad %>% mutate(fam = case_when((Features == "ratio") ~ "ratio",
+                                       (Features=="zscore")~ "zscore",
+                                       (Features=="states") ~ "epi",
+                                       (Features=="H3K36me3-human") ~"epi",
+                                       (Features=="H4K20me1-human") ~"epi",
+                                       .default = as.character(fam)))
+  
+features_annot<-features_annot %>% mutate('fam'= case_when((fam=="TE") ~ "Repeats - TE",
+                                     (fam=='zscore') ~ "Chromosomal Change",
+                                     (fam=='ratio') ~ 'Fragmentation PC',
+                                     (fam=='LINE') ~ 'Repeats - LINE',
+                                     (fam=='Satellite') ~ "Repeats - Satellite",
+                                     (fam=='LTR') ~ 'Repeats - LTR',
+                                     (fam=='epi') ~ 'Epigenetic'
+                                     ))
+
+
+features_annot<-features_annot %>% mutate(fam=if_else(is.na(fam),"Epigenetic",fam))
+  
+features_annot$`Feature type`<-features_annot$fam
+#features_annot$`Features2023`<-features_annot$fam
+features_annot[, c("Features","fam")] <- NULL
+features_annot <- data.frame(features_annot, row.names = 1)
+rownames(features_annot) <- colnames(dna_features)
+```
+
+
+```{r data.setup, echo=FALSE}
+sample_annot$`Treatment response`<-ordered (sample_annot$`Treatment response`, levels = c("Baseline", "Progressive Disease", "Stable Disease","Partial Response"))
+
+sample_annot$'Overall survival'<-ordered (sample_annot$'Overall survival', levels = c('<6 months', '1-2 years','2-3 years', '3+ years'))
+
+sample_annot$'Progression free survival' <-ordered (sample_annot$'Progression free survival', levels = c('<6 months', '6 months to 1 year', '2-3 years', '3+ years'))
+
+sample_annot <- sample_annot[with(sample_annot, order(`Treatment response`, - `ARTEMIS.DELFI.Score`)),]
+
+dna_features <- dna_features[rownames(sample_annot),]
+split <- sample_annot$`Treatment response`
+split <- ordered(split, levels = c("Baseline","Progressive Disease" , "Stable Disease","Partial Response"))
+```
+
+```{r ext-fig22b, fig.width =20, fig.height = 8, dev=c("png", "pdf")}
+col_fun_body = colorRamp2(c(-2, -1, 0, 1, 2), rev(c('red3', 'lightcoral', 'white', 'lightskyblue1', '#2166ac')))
+col_fun_row = list(
+                   `Overall survival` = structure(c("#65156e",'#9f2a63', '#d44842', '#f57d15', '#fac228'), names = c('<6 months', '6 months to 1 year', '1-2 years','2-3 years', '3+ years')),
+                   `Progression free survival` = structure(c('#65156e','#9f2a63', '#d44842', '#f57d15','#fac228'), names = c('<6 months', '6 months to 1 year', '1-2 years','2-3 years','3+ years')),
+                   `Treatment response` = structure(c('#382A54FF', '#60CEACFF', '#DEF5E5FF','#3497A9FF'), names = c('Baseline', 'Stable Disease', 'Partial Response', 'Progressive Disease')),
+                   `ARTEMIS.DELFI.Score` = colorRamp2(c(0, 1), c('#ffffff', '#111111')))
+col_fun_column = list(`Feature.type` = structure(c('turquoise4','darkorange2', 'mediumpurple3',"darkmagenta","blueviolet","mediumorchid3","maroon3"), names = c('Chromosomal Change', 'Fragmentation PC', 'Repeats - LINE',"Repeats - TE","Repeats - Satellite","Repeats - LTR","Epigenetic")))
+
+ht <- Heatmap(dna_features, name = "Fragment features", col = col_fun_body, show_row_dend =  FALSE, show_column_dend = FALSE, show_row_names = FALSE, show_column_names = FALSE, row_title = 'Patient samples and characteristics', column_title = 'Features', left_annotation = rowAnnotation(df = sample_annot, col = col_fun_row, annotation_name_side= 'bottom'), top_annotation = columnAnnotation(df = features_annot, col = col_fun_column, annotation_name_side= 'left'), row_split = split, cluster_row_slices = FALSE, cluster_rows = FALSE)
+
+draw(ht, annotation_legend_side = "bottom", heatmap_legend_side = "bottom", padding = unit(c(20, 2, 2, 2), "mm"))
+```

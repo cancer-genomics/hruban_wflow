@@ -1,0 +1,16 @@
+---
+title: Overview of study design and samples
+---
+
+
+Schematic of study design showing timeline of treatment, timeline of sample collection, and molecular analyses for both the CheckPAC and the PACTO cohort. Tumor and WBCs were sequenced from patients in the CheckPAC cohort to generate a list of somatic variants present in tumor. WGMAF values were calculated in plasma samples as the number of mutant observations divided by total number of observations across all mutated positions with tumor-specific somatic mutations. ARTEMIS-DELFI scores were generated with a fixed model using fragmentation patterns, chromosomal gains and losses, and repeat elements as features. These scores were compared to progression free and overall survival data, and multivariate hazard analyses were performed.
+
+
+```{r packages, message = FALSE}
+library(here)
+```
+
+
+```{r fig1a, echo=FALSE, out.width = "100%"}
+knitr::include_graphics("assets/fig1a.png", error = FALSE)
+```

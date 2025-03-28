@@ -1,0 +1,41 @@
+---
+title: WGMAF approach predicts survival for patients in CheckPAC trial
+---
+
+
+Boxplot of WGMAF values for baseline samples and follow-up samples sorted by clinical PD, SD, and PR.  P-values were calculated using the Wilcoxon signed-rank test. 
+
+
+```{r packages, message = FALSE}
+library(ggpubr)
+library(here)
+library(readxl)
+library(tidyverse)
+```
+
+
+```{r fig2b, fig.height=7, fig.width=3.5, dev = c("png", "pdf")}
+clean_data<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S1",range="A2:X45")
+delfi_pred<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S2",range="A2:P219")
+
+delfi_pred<-delfi_pred %>% filter(Timepoint!="follow up", Timepoint!="cycle 1", `WGMAF`!="-")
+
+delfi_pred$WGSMAF<-as.numeric(delfi_pred$WGMAF)
+DELFI_complete<-inner_join(delfi_pred,clean_data, by="Patient")
+DELFI_complete<-DELFI_complete %>% mutate(class = case_when((Timepoint == "Baseline") ~ "Baseline",
+                                        TRUE ~ `BOR RECIST 1.1`))
+DELFI_complete<-DELFI_complete %>% filter(`BOR RECIST 1.1`!="Not Evaluable")
+
+DELFI_complete<-DELFI_complete %>% mutate(class = case_when((class  == "Baseline") ~ "Baseline",
+                                                            (class == "Stable Disease") ~ "SD",
+                                                            (class == "Partial Response") ~ "PR",
+                                                            (class == "Progressive Disease") ~ "PD"))
+
+DELFI_complete$class <- factor(DELFI_complete$class, levels = c("Baseline","PD","SD","PR"), ordered = TRUE)
+my_comparisons <- list(c("SD", "PR"), c("PD", "PR"),c("Baseline", "PR") )
+
+ggplot(DELFI_complete, aes(x=class, y=WGSMAF, fill=class)) + 
+  geom_boxplot(outlier.shape = NA)+   stat_compare_means(comparisons = my_comparisons)+ ylab("WGMAF scores")+ xlab("")+ theme_classic()+scale_fill_manual(values=c("#C77CFF", "#F8766D","#00BFC4","#7CAE00"))+ geom_point(alpha=1/3, position=position_jitter(0.2), size=.8)+scale_y_continuous(labels = scales::percent)+labs(fill = "")
+
+DELFI_complete_fd<-DELFI_complete %>% filter (class=="Baseline")
+```

@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Landmark CA19-9 levels show limited correlation with response for patients in CheckPAC trial</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">hruban_wflow</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Landmark CA19-9 levels show limited
+correlation with response for patients in CheckPAC trial</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2025-03-27
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>hruban_wflow/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250319code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250319)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250319code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250319)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong6dc79eb">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong> 6dc79eb
+</a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong6dc79eb"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 6dc79eb.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+
+Untracked files:
+    Untracked:  README.Rmd
+    Untracked:  analysis/ext-fig1.Rmd
+    Untracked:  analysis/ext-fig10.Rmd
+    Untracked:  analysis/ext-fig11.Rmd
+    Untracked:  analysis/ext-fig12.Rmd
+    Untracked:  analysis/ext-fig13.Rmd
+    Untracked:  analysis/ext-fig14.Rmd
+    Untracked:  analysis/ext-fig15.Rmd
+    Untracked:  analysis/ext-fig16a.Rmd
+    Untracked:  analysis/ext-fig16b.Rmd
+    Untracked:  analysis/ext-fig17.Rmd
+    Untracked:  analysis/ext-fig18.Rmd
+    Untracked:  analysis/ext-fig19.Rmd
+    Untracked:  analysis/ext-fig20.Rmd
+    Untracked:  analysis/ext-fig21a.Rmd
+    Untracked:  analysis/ext-fig21b.Rmd
+    Untracked:  analysis/ext-fig22a.Rmd
+    Untracked:  analysis/ext-fig22b.Rmd
+    Untracked:  analysis/ext-fig23a.Rmd
+    Untracked:  analysis/ext-fig23b.Rmd
+    Untracked:  analysis/ext-fig24.Rmd
+    Untracked:  analysis/ext-fig2a.Rmd
+    Untracked:  analysis/ext-fig2b.Rmd
+    Untracked:  analysis/ext-fig3.Rmd
+    Untracked:  analysis/ext-fig4.Rmd
+    Untracked:  analysis/ext-fig5.Rmd
+    Untracked:  analysis/ext-fig6.Rmd
+    Untracked:  analysis/ext-fig7.Rmd
+    Untracked:  analysis/ext-fig8.Rmd
+    Untracked:  analysis/ext-fig9.Rmd
+    Untracked:  analysis/fig1a.Rmd
+    Untracked:  analysis/fig1b.Rmd
+    Untracked:  analysis/fig2a.Rmd
+    Untracked:  analysis/fig2b.Rmd
+    Untracked:  analysis/fig2c.Rmd
+    Untracked:  analysis/fig3a.Rmd
+    Untracked:  analysis/fig3b.Rmd
+    Untracked:  analysis/fig4.Rmd
+    Untracked:  analysis/fig5.Rmd
+    Untracked:  analysis/fig6a.Rmd
+    Untracked:  analysis/fig6b.Rmd
+    Untracked:  analysis/fig6c.Rmd
+    Untracked:  analysis/fig7a.Rmd
+    Untracked:  analysis/fig7b.Rmd
+    Untracked:  analysis/fig8.Rmd
+    Untracked:  analysis/fig9a.Rmd
+    Untracked:  analysis/fig9b.Rmd
+    Untracked:  code/functions.R
+    Untracked:  code/hr_plot_funcs.R
+    Untracked:  code/liver.tools/
+    Untracked:  code/pivot_wider_pacto.R
+    Untracked:  code/process_ab.Rmd
+    Untracked:  code/process_tcga_beta.Rmd
+    Untracked:  code/rlucas/
+    Untracked:  code/useful.stuff.aa/
+    Untracked:  code/utility_funcs.R
+    Untracked:  data/120122_mutations.csv
+    Untracked:  data/CA199.csv
+    Untracked:  data/CP_PAC_artemis.xlsx
+    Untracked:  data/CheckPAC_clinical_annotated011622.xlsx
+    Untracked:  data/Checkpac_Test.csv
+    Untracked:  data/Expected.csv
+    Untracked:  data/ID_comparison.xlsx
+    Untracked:  data/Locked_Models/
+    Untracked:  data/PACTO Masterfile.xlsx
+    Untracked:  data/PACTO_BL_EOT_EOS_PFS_TA_jh.xlsx
+    Untracked:  data/Test_set_pacto.csv
+    Untracked:  data/allfeatures_pacto.5mb.hg19.csv
+    Untracked:  data/artemis.csv
+    Untracked:  data/barv1.csv
+    Untracked:  data/cellularity.csv
+    Untracked:  data/checkpac_5mb_bins/
+    Untracked:  data/checkpac_baseline_p2_dates.csv
+    Untracked:  data/checkpac_bins.csv
+    Untracked:  data/checkpac_ca199.csv
+    Untracked:  data/checkpac_ca199_baseline_p4_dates.csv
+    Untracked:  data/checkpac_features.csv
+    Untracked:  data/checkpac_plasma_manifest.xlsx
+    Untracked:  data/clinical_073123.xlsx
+    Untracked:  data/combined_bins_102324.rds
+    Untracked:  data/df_results_CAIRO5_2_6_ checkpac_ pacto.tsv
+    Untracked:  data/estimates/
+    Untracked:  data/fig2c_p2_data.rds
+    Untracked:  data/for_leal_plot_042324.xlsx
+    Untracked:  data/fp2_lucas_healthy.csv
+    Untracked:  data/i07_input.xlsx
+    Untracked:  data/loadings.rds
+    Untracked:  data/long_bins.csv
+    Untracked:  data/pacto_5mb_bins/
+    Untracked:  data/pacto_bins.csv
+    Untracked:  data/pacto_features.csv
+    Untracked:  data/sel_chr.txt
+    Untracked:  data/supplementary_tables.xlsx
+    Untracked:  data/tumor_tmb.txt
+    Untracked:  extdata/
+    Untracked:  output/process_tcga_beta.Rmd/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   README.md
+    Modified:   analysis/about.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/license.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<p>Boxplot showing log10 of CA19-9 concentration, sorted by baseline,
+and follow-up for patients with PD, SD, and PR. Wilcoxon P values are
+indicated above each comparison.</p>
+<pre class="r"><code>library(ggpubr)</code></pre>
+<pre><code>Loading required package: ggplot2</code></pre>
+<pre class="r"><code>library(here)</code></pre>
+<pre><code>here() starts at /Users/skoul/Library/CloudStorage/Dropbox/CGL-Mac/Projects/hruban_wflow</code></pre>
+<pre class="r"><code>library(readxl)
+library(tidyverse)</code></pre>
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ lubridate 1.9.4     ✔ tibble    3.2.1
+✔ purrr     1.0.4     ✔ tidyr     1.3.1</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>clean_data&lt;-read_excel(here(&quot;data/supplementary_tables.xlsx&quot;), sheet=&quot;Table S1&quot;,range=&quot;A2:W45&quot;)
+CA199&lt;-read_csv(here(&quot;data/CA199.csv&quot;)) %&gt;%
+  filter(timepoint!=&quot;follow up&quot;)</code></pre>
+<pre><code>Rows: 391 Columns: 6
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+chr (4): lab_date, timepoint, Sample, Secretor
+dbl (2): subject_id, ca199
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>clean_data$`Study ID`&lt;-as.character(clean_data$`Study ID`)
+CA199$ca199&lt;-as.numeric(CA199$ca199)
+CA199$`Study ID`&lt;-as.character(CA199$subject_id)</code></pre>
+<pre class="r"><code>DELFI_complete&lt;-inner_join(CA199, clean_data, by=&quot;Study ID&quot;)
+DELFI_complete&lt;-DELFI_complete %&gt;% mutate(class = case_when((timepoint == &quot;Baseline&quot;) ~ &quot;Baseline&quot;,
+                                        TRUE ~ `BOR RECIST 1.1`))
+DELFI_complete&lt;-DELFI_complete %&gt;% filter(`BOR RECIST 1.1`!=&quot;Not Evaluable&quot;)
+
+DELFI_complete&lt;-DELFI_complete %&gt;% mutate(class = case_when((class  == &quot;Baseline&quot;) ~ &quot;Baseline&quot;,
+                                                            (class == &quot;Stable Disease&quot;) ~ &quot;SD&quot;,
+                                                            (class == &quot;Partial Response&quot;) ~ &quot;PR&quot;,
+                                                            (class == &quot;Progressive Disease&quot;) ~ &quot;PD&quot;))
+
+DELFI_complete&lt;-DELFI_complete %&gt;% filter(`Study ID`!=&quot;85&quot;,`Study ID`!=&quot;94&quot;,`Study ID`!=&quot;99&quot;,`Study ID`!=&quot;1104&quot;)
+
+DELFI_complete$class &lt;- factor(DELFI_complete$class, levels = c(&quot;Baseline&quot;,&quot;PD&quot;,&quot;SD&quot;,&quot;PR&quot;), ordered = TRUE)
+
+my_comparisons &lt;- list(c(&quot;SD&quot;, &quot;PR&quot;), c(&quot;PD&quot;, &quot;PR&quot;),c(&quot;Baseline&quot;,&quot;PR&quot;))
+
+ggplot(DELFI_complete, aes(x=class, y=ca199, fill=class)) + 
+  geom_boxplot(outlier.shape = NA)+   stat_compare_means(comparisons = my_comparisons)+ ylab(&quot;log 10 of CA19-9&quot;)+ theme_classic()+scale_fill_manual(values=c(&quot;#C77CFF&quot;,&quot;#F8766D&quot;,&quot;#00BFC4&quot;,&quot;#7CAE00&quot;))+ scale_y_continuous(trans=&#39;log10&#39;)+ geom_point(alpha=1/3, position=position_jitter(0.2), size=.8)</code></pre>
+<pre><code>Warning in wilcox.test.default(c(4.13672056715641, 4.28780172993023,
+2.73158876518674, : cannot compute exact p-value with ties</code></pre>
+<p><img src="figure/ext-fig16a.Rmd/ext-fig16a-1.png" width="336" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: aarch64-apple-darwin20
+Running under: macOS 15.3.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+time zone: America/New_York
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] lubridate_1.9.4 forcats_1.0.0   stringr_1.5.1   dplyr_1.1.4    
+ [5] purrr_1.0.4     readr_2.1.5     tidyr_1.3.1     tibble_3.2.1   
+ [9] tidyverse_2.0.0 readxl_1.4.5    here_1.0.1      ggpubr_0.6.0   
+[13] ggplot2_3.5.1   workflowr_1.7.1
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.6      xfun_0.51         bslib_0.9.0       processx_3.8.6   
+ [5] rstatix_0.7.2     callr_3.7.6       tzdb_0.4.0        vctrs_0.6.5      
+ [9] tools_4.4.1       ps_1.9.0          generics_0.1.3    parallel_4.4.1   
+[13] pkgconfig_2.0.3   rematch_2.0.0     lifecycle_1.0.4   farver_2.1.2     
+[17] compiler_4.4.1    git2r_0.35.0      munsell_0.5.1     getPass_0.2-4    
+[21] carData_3.0-5     httpuv_1.6.15     htmltools_0.5.8.1 sass_0.4.9       
+[25] yaml_2.3.10       Formula_1.2-5     crayon_1.5.3      later_1.4.1      
+[29] pillar_1.10.1     car_3.1-3         jquerylib_0.1.4   whisker_0.4.1    
+[33] cachem_1.1.0      abind_1.4-8       tidyselect_1.2.1  digest_0.6.37    
+[37] stringi_1.8.4     rprojroot_2.0.4   fastmap_1.2.0     grid_4.4.1       
+[41] colorspace_2.1-1  cli_3.6.4         magrittr_2.0.3    broom_1.0.7      
+[45] withr_3.0.2       scales_1.3.0      promises_1.3.2    backports_1.5.0  
+[49] bit64_4.6.0-1     timechange_0.3.0  rmarkdown_2.29    httr_1.4.7       
+[53] bit_4.6.0         ggsignif_0.6.4    cellranger_1.1.0  hms_1.1.3        
+[57] evaluate_1.0.3    knitr_1.49        rlang_1.1.5       Rcpp_1.0.14      
+[61] glue_1.8.0        vroom_1.6.5       rstudioapi_0.17.1 jsonlite_1.9.1   
+[65] R6_2.6.1          fs_1.6.5         </code></pre>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

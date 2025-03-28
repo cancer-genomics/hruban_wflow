@@ -8,4 +8,73 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+The code used to generate the figures can be found at: https://github.com/cancer-genomics/hruban_wflow
+
+#### Figures
+1 Overview of study design and samples. [A](assets/fig1a.pdf)[[Code](fig1a.html)], [B](figure/fig1b.Rmd/fig1b-1.pdf)[[Code](fig1b.html)]
+
+2 WGMAF approach predicts survival for patients in CheckPAC trial. [A](figure/fig2a.Rmd/fig2a-1.pdf)[[Code](fig2a.html)], [B](figure/fig2b.Rmd/fig2b-1.pdf)[[Code](fig2b.html)], [C1](figure/fig2c.Rmd/fig2c-1.pdf), [C2](figure/fig2c.Rmd/fig2c-2.pdf)[[Code](fig2c.html)]
+
+3 cfDNA fragmentation features reflect underlying tumor biology in pancreatic cancer. [A](figure/fig3a.Rmd/fig3a-1.pdf)[[Code](fig3a.html)], [B](figure/fig3b.Rmd/fig3b-1.pdf)[[Code](fig3b.html)]
+
+4 Genome-wide cfDNA fragmentation profiles comprise chromatin structure from peripheral blood cells and pancreatic cancer. [Fig](figure/fig4.Rmd/fig4-1.pdf)[[Code](fig4.html)]
+
+5 Heat map of clinical features and cfDNA fragmentation and genomic repeat features. [Fig](figure/fig5.Rmd/fig5-1.pdf)[[Code](fig5.html)]
+
+6 ARTEMIS-DELFI scores predict survival for patients in CheckPAC trial. [A](figure/fig6a.Rmd/fig6a-1.pdf)[[Code](fig6a.html)], [B1](figure/fig6b.Rmd/fig6b-1.pdf), [B2](figure/fig6b.Rmd/fig6b-2.pdf)[[Code](fig6b.html)], [C1](figure/fig6c.Rmd/fig6c-1.pdf), [C2](figure/fig6c.Rmd/fig6c-2.pdf)[[Code](fig6c.html)]
+
+7 Multivariate hazard analyses demonstrate on-treatment ARTEMIS-DELFI scores as independent predictors of overall survival for patients in the CheckPAC trial. [A](figure/fig7a.Rmd/fig7a-1.pdf)[[Code](fig7a.html)], [B](figure/fig7b.Rmd/fig7b-1.pdf)[[Code](fig7b.html)]
+
+8 Example of a molecular responder and non-responder to treatment with different methodologies. [A](figure/fig8.Rmd/fig8-1.pdf), [B](figure/fig8.Rmd/fig8-2.pdf)[[Code](fig8.html)] 
+
+9 Multivariate hazard analyses demonstrate on-treatment ARTEMIS-DELFI scores as independent predictors of overall survival for patients in the PACTO trial. [A](figure/fig9a.Rmd/fig9a-1.pdf)[[Code](fig9a.html)], [B](figure/fig9b.Rmd/fig9b-1.pdf)[[Code](fig9b.html)]
+
+#### Supplementary Figures
+
+1 Flowchart of sample selection for WGMAF and ARTEMIS-DELFI analyses. [Fig](assets/ext-fig1.png)[[Code](ext-fig1.html)]
+
+2 Selection of post-treatment liquid biopsy timepoint for molecular analyses. [A](figure/ext-fig2a.Rmd/ext-fig2a-1.pdf)[[Code](ext-fig2a.html)], [B](figure/ext-fig2b.Rmd/ext-fig2b-1.pdf)[[Code](ext-fig2b.html)]
+
+3 Overview of WGMAF method. [Fig](assets/ext-fig3.png)[[Code](ext-fig3.html)]
+
+4 Genome-wide mutational landscape of patients with pancreatic cancer in CheckPAC study. [Fig](figure/ext-fig4.Rmd/ext-fig4-1.pdf)[[Code](ext-fig4.html)]
+
+5 WGMAF values correlate with targeted MAF analyses. [Fig](figure/ext-fig5.Rmd/ext-fig5-1.pdf)[[Code](ext-fig5.html)]
+
+6 WGMAF stratifies progression free and overall survival for patients in the CheckPAC trial with stable disease. [Fig](figure/ext-fig6.Rmd/ext-fig6-1.pdf)[[Code](ext-fig6.html)]
+
+7 Multivariate hazard analyses demonstrate on-treatment WGMAF values as independent predictors of overall survival for patients in the CheckPAC trial. [Fig](figure/ext-fig7.Rmd/ext-fig7-1.pdf)[[Code](ext-fig7.html)]
+
+8 Fragmentation patterns for patients in CheckPAC trial with partial response or stable disease are more closely correlated to healthy plasma. [Fig](figure/ext-fig8.Rmd/ext-fig8-1.pdf)[[Code](ext-fig8.html)]
+
+9 Feature importance for locked ARTEMIS-DELFI machine learning model. [Fig](figure/ext-fig9.Rmd/ext-fig9-1.pdf)[[Code](ext-fig9.html)]
+
+10 ARTEMIS-DELFI scores on-treatment and best overall response in CheckPAC trial. [Fig](figure/ext-fig10.Rmd/ext-fig10-1.pdf)[[Code](ext-fig10.html)]
+
+11 ARTEMIS-DELFI stratifies progression free and overall survival for patients in CheckPAC trial with stable disease. [Fig](figure/ext-fig11.Rmd/ext-fig11-1.pdf)[[Code](ext-fig11.html)]
+
+12 ARTEMIS-DELFI score and WGMAF value are closely correlated. [Fig](figure/ext-fig12.Rmd/ext-fig12-1.pdf)[[Code](ext-fig12.html)]
+
+13 ARTEMIS-DELFI samples detect 100% of samples with WGMAF>0.01. [Fig](figure/ext-fig13.Rmd/ext-fig13-1.pdf)[[Code](ext-fig13.html)]
+
+14 Survival analyses for RECIST scoring at first follow up scan and for BOR RECIST in CheckPAC trial. [Fig](figure/ext-fig14.Rmd/ext-fig14-1.pdf)[[Code](ext-fig14.html)]
+
+15 Timepoints selected for CA19-9 and CT for patients in CheckPAC trial. [Fig](figure/ext-fig15.Rmd/ext-fig15-1.pdf)[[Code](ext-fig15.html)]
+
+16 Landmark CA19-9 levels show limited correlation with response for patients in CheckPAC trial. [A](figure/ext-fig16a.Rmd/ext-fig16a-1.pdf)[[Code](ext-fig16a.html)], [B](figure/ext-fig16b.Rmd/ext-fig16b-1.pdf)[[Code](ext-fig16b.html)]
+
+17 ichorCNA shows limited correlation with clinical response and does not stratify progression free and overall survival. [Fig](figure/ext-fig17.Rmd/ext-fig17-1.pdf)[[Code](ext-fig17.html)]
+
+18 CA19-9 was correlated with ARTEMIS-DELFI and WGMAF for patients in CheckPAC trial who were secretors. [Fig](figure/ext-fig18.Rmd/ext-fig18-1.pdf)[[Code](ext-fig18.html)]
+
+19 Longitudinal evaluation of patient response to treatment in CheckPAC trial using imaging and liquid biopsies. [Fig](figure/ext-fig19.Rmd/ext-fig19comb.pdf)[[Code](ext-fig19.html)]
+
+20 Change in WGMAF value stratifies progression free but not overall survival at 8-week timepoint in CheckPAC trial. [Fig](figure/ext-fig20.Rmd/ext-fig20-1.pdf)[[Code](ext-fig20.html)]
+
+21 Change in DELFI-TF scores between baseline and 8 week time point scores are predictive of progression free and overall survival in CheckPAC trial. [A](figure/ext-fig21a.Rmd/ext-fig21a-1.pdf)[[Code](ext-fig21a.html)], [B](figure/ext-fig21b.Rmd/ext-fig21b-1.pdf)[[Code](ext-fig21b.html)]
+
+22 DELFI features correlate with clinical response of patients in PACTO cohort. [A](figure/ext-fig22a.Rmd/ext-fig22a-1.pdf)[[Code](ext-fig22a.html)], [B](figure/ext-fig22b.Rmd/ext-fig22b-1.pdf)[[Code](ext-fig22b.html)]
+
+23 ARTEMIS-DELFI scores predict survival for patients in PACTO trial. [A](figure/ext-fig23a.Rmd/ext-fig23a-1.pdf)[[Code](ext-fig23a.html)], [B](figure/ext-fig23b.Rmd/ext-fig23b-1.pdf)[[Code](ext-fig23b.html)]
+
+24 RECIST 1.1 scoring at first follow-up scan does not stratify overall survival in the PACTO trial. [Fig](figure/ext-fig24.Rmd/ext-fig24-1.pdf)[[Code](ext-fig24.html)]

@@ -1,0 +1,89 @@
+---
+title: ARTEMIS-DELFI samples detect 100% of samples with WGMAF>0.01
+---
+
+
+For each level of WGMAF, the fraction of samples detected by ARTEMIS-DELFI is indicated from .8-1 on the y axis.
+
+
+```{r packages, message = FALSE}
+library(cowplot)
+library(here)
+library(readxl)
+library(tidyverse)
+```
+
+
+```{r load_data}
+suppl <- read_excel(here("data/supplementary_tables.xlsx"),
+                    sheet = "Table S2", skip = 1)
+```
+
+
+```{r compute_hits_vs_wgmaf}
+# Removing samples without WGMAF values
+suppl <- suppl %>%
+          select(patient_id = Patient, sample_id = Sample, wgmaf = WGMAF, artemis_delfi_score = `ARTEMIS-DELFI Score`) %>%
+          filter(wgmaf != "-") %>%
+          mutate(wgmaf = as.numeric(wgmaf))
+
+# Creating a column to indicate the post-tx samples from the exceptional responder to use as the ctDNA-free samples.
+suppl <- suppl %>%
+           mutate(ctdna_free = case_when(patient_id == "CGPLPA223" & !(sample_id == "CGPLPA223P") ~ TRUE,
+                                         TRUE ~ FALSE))
+
+# Counting the number of samples considered ctDNA-free
+suppl %>%
+  filter(ctdna_free == TRUE) %>%
+  nrow
+
+# Getting the maximum WGMAF of cfDNA-free samples. Samples with WGMAF above this level can be considered ctDNA+.
+wgmaf_max_cancer_free <- suppl %>%
+                           filter(ctdna_free == TRUE) %>%
+                           .$wgmaf %>%
+                           max
+print(wgmaf_max_cancer_free) # Returns: 0.000283849. Anything above 0.001 would then easily test positive, using this threshold for the cumulative fraction detected figure.
+
+# Getting the range of WGMAF of cfDNA-free samples. Samples with WGMAF above this level can be considered ctDNA+.
+suppl %>%
+  filter(ctdna_free == TRUE) %>%
+  arrange(wgmaf)
+
+# Getting the maximum ARTEMIS-DELFI score of cfDNA-free samples. Samples with ARTEMIS-DELFI score above this level can be considered ctDNA+.
+artemis_delfi_max_cancer_free <- suppl %>%
+  filter(ctdna_free == TRUE) %>%
+  .$artemis_delfi_score %>%
+  max
+
+# Computing the cumulative fraction of samples that test positive with ARTEMIS-DELFI across WGSMAF values from ~1 --> 0.001
+suppl <- suppl %>%
+        mutate(wgmaf_positive = case_when(wgmaf > wgmaf_max_cancer_free ~ TRUE,
+                                          TRUE ~ FALSE)) %>%
+        mutate(artemis_delfi_positive = case_when(artemis_delfi_score > artemis_delfi_max_cancer_free ~ TRUE,
+                                                  TRUE ~ FALSE)) %>%
+        filter(wgmaf_positive == TRUE) %>%
+        arrange(desc(wgmaf)) %>%
+        mutate(cumulative_eval = 1:n(),
+               cumulative_positive_artemis_delfi = cumsum(artemis_delfi_positive)) %>%
+        mutate(cumulative_frac_positive_artemis_delfi = cumulative_positive_artemis_delfi / cumulative_eval)
+```
+
+
+```{r ext-fig13, fig.width = 7, fig.height = 7, dev = c("png", "pdf")}
+# Plotting
+ggplot(data = suppl, aes(x = wgmaf, y = cumulative_frac_positive_artemis_delfi)) +
+          geom_line() +
+          scale_x_continuous(trans = "log10",
+                             breaks = c(0.1, 0.01, 0.001),
+                             labels = c("0.1", "0.01", "0.001"),
+                             guide = guide_axis_logticks()) +
+          theme_cowplot() +
+          xlab("WGMAF") +
+          ylab("Cumulative fraction of samples detected\nby ARTEMIS-DELFI")
+
+# At least 95% of samples are detected above X WGMAF?
+suppl %>% filter(cumulative_frac_positive_artemis_delfi >= 0.95) %>% .$wgmaf %>% tail(1)
+
+# Get the cumulative fraction of positive samples with ARTEMIS-DELFI at WGMAF ≥ 0.001 (0.1%)
+suppl %>% filter(wgmaf <= 0.001) %>% .$cumulative_frac_positive_artemis_delfi %>% head(1)
+```

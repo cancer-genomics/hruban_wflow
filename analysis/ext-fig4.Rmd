@@ -1,0 +1,56 @@
+---
+title: Genome-wide mutational landscape of patients with pancreatic cancer in CheckPAC study
+---
+
+
+Overall survival is colored at the top, by clinical PR, SD, and PD. Single base substitution mutations are indicated along vertical axis, sorted by pathway. Patients are listed along the horizontal axis. Mutations are colored according to mutation type.
+
+
+```{r package, message = FALSE}
+library(cowplot)
+library(lubridate)
+library(here)
+library(tidyverse)
+```
+
+
+```{r load_data}
+mutations <- read.csv(here("data/120122_mutations.csv"))
+barv1 <- read.csv(here("data/barv1.csv"))
+cellularity <- read.csv(here("data/cellularity.csv"))
+barv1$x <- as.factor(barv1$x)
+mutations1 <- barv1 %>%
+  inner_join(cellularity, by = "labid") %>%
+  inner_join(mutations, by = "labid")
+```
+
+
+```{r ext-fig4, fig.width = 8, fig.height = 14, dev = c("png", "pdf")}
+p1 <- ggplot(data = barv1, aes(x = reorder(labid, -Survival), y = Survival,
+                               fill = Best.Overall.Response)) +
+  scale_fill_manual(values = c("#C77CFF", "#7CAE00", "#F8766D", "#00BFC4")) +
+  geom_bar(stat = "identity") +
+  facet_grid(~ 1, scale = "free_x", space = "free_x") +
+  labs(x = "") +
+  theme(axis.text.x = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.margin = unit(c(1, 1, 0, 1), "cm")) +
+  guides(fill = guide_legend(title = ""))
+
+p2 <- ggplot(mutations1, aes(x = reorder(labid, -Survival.x), y = gene)) +
+  geom_tile(aes(fill = type), size = 0.8, width = 0.8, height = 0.8) +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(size = 10, angle = 90, vjust = 0.5),
+        strip.text.y.right = element_text(angle = 0)) +
+  facet_grid(factor(pathways) ~ 1,
+             scale = "free", space = "free") +
+  labs(x = "") +
+  theme(strip.background.x = element_blank(),
+        strip.text.x = element_blank(),
+        plot.margin = unit(c(0, 1, 1, 1), "cm")) +
+  guides(fill = guide_legend(title = ""))
+
+plot_grid(p1, p2, ncol = 1, rel_heights = c(0.2, 1), align = "v", axis = "lr")
+```

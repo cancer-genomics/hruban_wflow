@@ -7,4 +7,8 @@ editor_options:
   chunk_output_type: console
 ---
 
-Describe your project.
+### Genome-wide analyses of cell-free DNA for therapeutic monitoring of patients with pancreatic cancer
+
+<font size = "1">Carolyn Hruban, Daniel C. Bruhm, Inna M. Chen, Shashikant Koul, Akshaya V. Annapragada, Nicholas A. Vulpescu, Sarah Short, Susann Theile, Kavya Boyapati, Bahar Alipanahi, Zachary L Skidmore, Alessandro Leal, Stephen Cristiano, Vilmos Adleff, Julia S. Johannsen, Robert B. Scharpf, Zachariah H. Foda, Jillian Phallen, and Victor E. Velculescu</font>
+
+Determining response to therapy for patients with pancreatic cancer can be challenging. We evaluated methods for assessing therapeutic response using cell-free DNA (cfDNA) in plasma samples from 40 patients with metastatic pancreatic cancer as part of the CheckPAC trial (NCT02866383). Patients were evaluated before and after initiation of therapy using tumor-informed plasma whole-genome sequencing (WGMAF), and genome-wide cfDNA fragmentation profiles and repeat landscapes (ARTEMIS-DELFI). Of those assessed with WGMAF, molecular responders had a median overall survival (OS) of 319 days compared to 126 days for non-responders (HR=0.29, 95% CI=0.11–0.79, p=0.011). For ARTEMIS-DELFI, patients with low scores after therapy initiation had a longer median OS than patients with high scores (233 days versus 172 days, HR=0.12, 95% CI=0.046-0.31, p<0.0001). We validated ARTEMIS-DELFI in a separate cohort of 40 patients with pancreatic cancer who were part of the PACTO trial (NCT02767557). These analyses suggest that non-invasive mutation and fragmentation-based cfDNA approaches can identify therapeutic response of individuals with pancreatic cancer.

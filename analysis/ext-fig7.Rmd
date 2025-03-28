@@ -1,0 +1,154 @@
+---
+title: Multivariate hazard analyses demonstrate on-treatment WGMAF values as independent predictors of overall survival for patients in the CheckPAC trial
+---
+
+
+Multivariate Cox proportional hazard analyses were generated for each molecular method and fit to overall survival adjusting for clinical subgroups. Each of the indicated subgroups that have been shown to be significant on univariate analyses in previous studies (7) have been included in the multivariate analysis.  Hazard models are shown using WGMAF  values at baseline and 8-week timepoint for patients in the CheckPAC study.
+
+
+```{r packages, message = FALSE}
+library(here)
+library(readxl)
+library(survival)
+source(here("code/hr_plot_funcs.R"))
+```
+
+
+```{r load_clin_data}
+baseline_c <- read_excel("data/CheckPAC_clinical_annotated011622.xlsx") %>%
+  select(subject_id = StudySubjectID,
+         age,
+         weightloss5_yn = weighttloss5_yn,
+         ecog_ps = PS_cycle1,
+         bor = `Best overall confirmed response (RECIST)`,
+         ca199 = LAB_CA199_E1_C4,
+         crp = LAB_CRP_E1_C4,
+         bilirubin = LAB_Bilirubin_E1_C4,
+         albumin = LAB_Albumin_E1_C4) %>%
+  mutate(mgps = case_when(crp <= 10 ~ 0,
+                          crp > 10 & albumin >= 35 ~ 1,
+                          crp > 10 & albumin < 35 ~ 2))
+long_c <- read_excel("data/clinical_073123.xlsx") %>%
+  select(subject_id = StudySubjectID,
+         arm = Arm,
+         nivo_start_date = Nivo_StartDate,
+         pfs_date = PFS_date,
+         surv_date = Survival_date,
+         surv_status = Survival_status) %>%
+  mutate(surv_status = case_when(surv_status == 2 ~ "Dead",
+                                 surv_status == 1 ~ "Alive"),
+         arm = factor(arm))
+clin_c <- inner_join(baseline_c, long_c, by = "subject_id")
+
+# Fix the date formats
+for (i in colnames(clin_c)) {
+  if (str_detect(i, "[Dd]ate")) {
+    if (!any(class(clin_c[[i]]) == "POSIXt")) {
+      clin_c[[i]] <- as.Date(as.numeric(clin_c[[i]]), origin = "1899-12-30")
+    } else {
+      clin_c[[i]] <- as.Date(clin_c[[i]])
+    }
+  }
+}
+
+# Compute overall and progression-free survival time
+surv_c <- clin_c %>%
+  mutate(pfs = as.numeric(difftime(pfs_date, nivo_start_date)),
+         os = as.numeric(difftime(surv_date, nivo_start_date))) %>%
+  mutate(death = ifelse(surv_status == "Dead", 1, 0))
+```
+
+
+```{r load_wgmaf}
+tmb_filter_ids <- read_tsv(here("data/tumor_tmb.txt")) %>%
+  filter(sbs.tmb.filtered >= 50) %>%
+  pull(patient_id)
+wgmaf <- read_excel(here("data/i07_input.xlsx"), sheet="plasma_mafs", na = "#NULL!") %>%
+                rename(date = "date_blood_draw") %>% mutate(date = as.Date(date, format = "%m/%d/%Y")) %>%
+  filter(plasma_read_length != "150",
+         patient_id %in% tmb_filter_ids)
+
+# Select baseline and two-week visit timepoints
+blood_draw_c <- read_excel("data/checkpac_plasma_manifest.xlsx") %>%
+  select(cgid = `Sample ID*`, patient_id = Patient, date_blood_draw = Date) %>%
+  mutate(date_blood_draw = as.Date(date_blood_draw))
+# See "/dcs05/scharpf/data/skoul/Projects/checkpac/patient_selection" for more
+# information
+blood_draw_c[blood_draw_c$cgid == "CGPLPA223P16",
+             "date_blood_draw"] <- as.Date("2019-12-20")
+blood_draw_c[blood_draw_c$cgid == "CGPLPA794P4",
+             "date_blood_draw"] <- as.Date("2020-02-21")
+blood_draw_bl_or_p1_c <- blood_draw_c %>%
+  mutate(visit = str_extract(cgid, "(?<=CG[A-Z]{1,5}[0-9]{1,5}P).*"),
+         visit = sapply(visit, function(x) str_split(x, "_")[[1]][1])) %>%
+  filter(visit == "" | visit == "2")
+blood_draw_bl_and_p1_c <- blood_draw_bl_or_p1_c %>%
+  filter(patient_id %in% pull(filter(count(group_by(blood_draw_bl_or_p1_c,
+                                                    patient_id)),
+                                     n > 1),
+                              patient_id)) %>%
+  mutate(visit = ifelse(visit == "", "baseline", "week8"))
+```
+
+
+```{r combine_clin_wgmaf}
+exclude_c <- c("CGPLPA225", "CGPLPA783", "CGPLPA795")
+id_map_c <- read_excel("data/ID_comparison.xlsx") %>%
+  filter(!unlist(lapply(CGID, function(x) any(str_detect(x, exclude_c))))) %>%
+  select(patient_id = CGID, subject_id = StudySubjectID) %>%
+  mutate(patient_id = substring(patient_id, 1, 9))
+
+surv_artemis_delfi_c <- surv_c %>%
+  inner_join(id_map_c) %>%
+  inner_join(blood_draw_bl_and_p1_c) %>%
+  inner_join(select(wgmaf, -plasma_id),
+             by = join_by("patient_id", "date_blood_draw" == "date")) %>%
+  select(subject_id, patient_id, mf,
+         arm, ca199, bilirubin, age, mgps, ecog_ps, weightloss5_yn, visit,
+         pfs, os, death) %>%
+  pivot_wider(names_from = visit, values_from = mf) %>%
+  mutate(bilirubin_bin = bilirubin > 25,
+         age_bin = age <= 65,
+         mgps_bin = factor(mgps, levels = c(0, 1, 2)),
+         ecog_ps_bin = ecog_ps == 1,
+         ca199_bin = ca199 > 37,
+         weightloss5_yn_bin = weightloss5_yn == 1)
+```
+
+
+```{r ext-fig7, fig.width = 12, fig.height = 5, dev = c("png", "pdf")}
+covar_labels <- c("Age, years",
+                  "> 65",
+                  "\u2264 65",
+                  "ECOG PS",
+                  "0",
+                  "1",
+                  "Weight loss, %",
+                  "< 5",
+                  "\u2265 5",
+                  "MGPS",
+                  "0",
+                  "1",
+                  "2",
+                  "Treatment",
+                  "RT+Nivo",
+                  "RT+Nivo/Ipi")
+
+surv_data <- surv_artemis_delfi_c %>%
+  mutate(baseline = scale(baseline)[, 1],
+         week8 = scale(week8)[, 1])
+
+mf <- coxph(Surv(os, death) ~ age_bin + ecog_ps_bin + weightloss5_yn_bin +
+              mgps_bin + arm + baseline + week8, surv_data)
+
+var_labels <- c(covar_labels,
+                "WGMAF score",
+                "Baseline",
+                "WGMAF score",
+                "On-treatment (week 8)")
+
+cox_tb <- get_hr_tbl(surv_data, mf)
+
+print(plot_hr(cox_tb, var_labels = var_labels))
+```
+

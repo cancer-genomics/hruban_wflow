@@ -1,0 +1,169 @@
+---
+title: cfDNA fragmentation features reflect underlying tumor biology in pancreatic cancer  
+---
+
+
+Fraction of CNV changes by chromosomal arm for PDAC cancers in TCGA are shown alongside assessment of copy number changes in CheckPAC patients, as quantified by the median log-ratio by arm for tumor copy number gains and losses and z-scores by arm for all patients with plasma samples at baseline, and at follow-up for each of the clinical RECIST 1.1 response categories.
+
+
+```{r packages, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(data.table)
+library(RColorBrewer)
+library(here)
+devtools::load_all(here("code/liver.tools"))
+source(here("code/functions.R"))
+```
+
+
+```{r data}
+# Load TCGA data 
+fig.data <- readRDS(here("data/fig2c_p2_data.rds"))
+# Update liver to pancreas at the source
+
+# Load CNV data from FACETS
+fnames <- list.files(here("data/estimates"), pattern=".tsv$")
+noares <- fnames %>%
+  file.path(here("data/estimates"), .) %>%
+  map_dfr(get_cnv)
+
+# Load DELFI features
+features <- read_csv(here("data/checkpac_features.csv"))
+clean_data<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S1",range="A2:X45")
+delfi_pred<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S2",range="A2:P219")
+delfi_pred<-delfi_pred %>% filter(Timepoint!="follow up", Timepoint!="cycle 1")
+DELFI_complete<-inner_join(delfi_pred,clean_data, by="Patient")
+```
+
+
+```{r fig3b, fig.height = 40, fig.width = 20,dev = c("png", "pdf")}
+# TCGA panel
+setDT(fig.data)
+fig.data[,bin:=as.factor(rev(bin))][]
+fig.data$disease<-"TCGA Pancreatic Cancers\n "
+tcga <- fig.data %>%
+  mutate(disease="TCGA Pancreatic Cancers\n ") %>%
+  ggplot(aes(x=value, y=bin, color=change, fill=change)) +
+  facet_grid(arm~disease, scales = 'free_y') +
+  geom_col() +
+  scale_x_continuous() +
+  scale_fill_manual(values=c("#FF6636","#66CCCC"))+
+  scale_colour_manual(values=c("#FF6636","#66CCCC"))+
+  theme_minimal(base_size=24) +
+  theme(strip.text.y = element_text(angle = 0,
+                                    hjust = 0.5,
+                                    vjust = 0.5,
+                                    size=20),
+        strip.text.x=element_text(size=20),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid =  element_blank(),
+        legend.title = element_blank(),
+        legend.position="bottom") +
+  xlab("Proportion of\ncases with CNV") +
+  ylab("Chromosome Arm")
+
+# Tumor panel 
+noares1 <- noares %>%
+    mutate(colors= case_when((cnv_score>=.05) ~ "Positive",
+    (cnv_score>=(-.05)) ~ "Neutral",
+    (cnv_score<(-.05)) ~ "Negative"))
+noares1$colors<-factor(noares1$colors, levels=c("Positive","Neutral","Negative"))
+noares1 <- noares1 %>% mutate(transp=if_else(colors=="Neutral",1,1))
+noares1$y=1
+noares1<-noares1 %>% rename(Arm= chrarm)
+noares1  <- noares1 %>%rename(id=ID)
+noares1<-noares1 %>% mutate(BOR="Tumor")
+noares1  <- noares1 %>%
+        rename(z=cnv_score) %>%
+        mutate(root2=nroot(z, 2)) %>%
+        mutate(root3=nroot(z, 3))
+noares2<-noares1 %>% mutate(source="Tumor")
+
+# Plasma panel 
+DELFI_complete$id<-DELFI_complete$Sample
+DELFI_complete<-DELFI_complete %>% mutate(BOR = case_when((Timepoint == "Baseline") ~ "Baseline",
+                                                          TRUE ~ `BOR RECIST 1.1`))
+DELFI_complete<-DELFI_complete %>% filter(`BOR RECIST 1.1`!="Not Evaluable")
+
+cols <- c("#FF6636","#66CCCC","#FFCC66","#FFCC66","#66CCCC","#FFFF00","#FF9900")
+features <- features %>% select(id,starts_with("z"))
+features <- inner_join(features, DELFI_complete %>%
+                       select(id,BOR),
+                   by=c("id"="id"))
+features <- features %>%
+  gather(key="Arm", value="Zscore", starts_with("z"))
+features$Arm <- sapply( str_split(features$Arm,"_"), "[", 2 )
+chrlevels <- c("1p","1q","2p","2q","3p","3q","4p","4q","5p",
+               "5q","6p","6q","7p","7q","8p","8q","9p","9q",
+               "10p","10q","11p","11q","12p","12q",
+               "13q","14q","15q","16p","16q","17p","17q",
+               "18p","18q","19p","19q","20p","20q","21q","22q")
+features$Arm <- factor(features$Arm,
+                       levels = chrlevels)
+features <- features %>% mutate(colors=if_else(Zscore<=0,"Negative","Positive"))
+features <- features %>%
+        mutate(colors=if_else(Zscore>= -3.22 & Zscore <= 3.22 ,
+                              "Neutral", features$colors))
+features <- features %>% mutate(transp=if_else(colors=="Neutral",1,1))
+
+features$colors<-factor(features$colors,levels=c("Positive","Negative","Neutral"))
+features$y=1
+
+features <- features %>% mutate(Zscore=if_else(Zscore<=-150,-150,Zscore))
+features <- features %>% mutate(Zscore=if_else(Zscore>150,150,Zscore))
+features2  <- features %>%
+        rename(z=Zscore) %>%
+        mutate(root2=nroot(z, 2)) %>%
+        mutate(root3=nroot(z, 3))
+features2<-features2 %>%mutate(source="Plasma")
+
+# Combine tumor and plasma data
+features3<-rbind(features2, noares2) %>%
+  mutate(BOR = factor(BOR, levels = c("Tumor", "Baseline", "Progressive Disease",
+                                      "Stable Disease", "Partial Response")))
+# Restrict data to -150 to 150 for plasma and -1.5 to 1.5 for tumor
+xaxis_lim <- tibble(id = paste(rep("DUMMY", 10), 1:10),
+                    BOR = factor(rep(levels(features3$BOR), each = 2),
+                                 levels = levels(features3$BOR)),
+                    Arm = factor("1p", levels = chrlevels),
+                    colors = factor(rep(c("Negative", "Positive"), 5),
+                                    levels = levels(features3$colors)),
+                    z = c(c(-1.5, 1.5),
+                          rep(c(-150, 150), 4)),
+                    transp = 0,
+                    y = 1)
+ns <- features3 %>%
+    group_by(BOR) %>%
+    summarize(n=length(unique(id))) %>%
+    mutate(label=paste0(BOR, "\n(n = ", n, ")"))
+ns <- setNames(ns$label, ns$BOR)
+
+jhu <- features3 %>%
+    bind_rows(xaxis_lim) %>%
+    ggplot(aes(x=y, y=z, color=colors, alpha=transp)) +
+    geom_point(size=5) +
+    facet_grid(Arm ~ BOR, labeller=labeller(BOR=ns), scales = "free_x") +
+    coord_flip() +
+    theme_minimal(base_size=24) +
+    theme(strip.text.y.left = element_text(angle = 0,
+                                           hjust = 0.5,
+                                           vjust = 0.5),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+
+          panel.grid =  element_blank(),
+          plot.title = element_blank(),
+          legend.title = element_blank(),
+          axis.title.y=element_blank(),
+          legend.position = "bottom",
+          strip.text.y = element_blank()) +
+    scale_y_continuous() +
+    scale_alpha_identity() +
+    scale_fill_manual(values = cols) +
+    scale_color_manual(values = cols) +
+    ylab("Z-Score")
+
+cowplot::plot_grid(tcga, jhu, nrow = 1, rel_widths = c(1, 2.5), align = "h")
+```

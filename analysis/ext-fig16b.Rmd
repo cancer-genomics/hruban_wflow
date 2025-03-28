@@ -1,0 +1,148 @@
+---
+title: Landmark CA19-9 levels show limited correlation with response for patients in CheckPAC trial
+---
+
+
+Multivariate cox proportional hazard analyses were generated for each molecular method and fit to overall survival adjusting for clinical subgroups. Each of the indicated subgroups that have been shown to be significant on univariate analyses in previous studies(7) have been included in the multivariate analysis.  Hazard ratios and P values are indicated on the right for individuals in the CheckPAC study, after excluding those who do not secrete CA19-9.
+
+
+```{r packages, message = FALSE}
+library(here)
+library(readxl)
+library(survival)
+source(here("code/hr_plot_funcs.R"))
+```
+
+
+```{r load_clin_data}
+baseline_c <- read_excel(here("data/CheckPAC_clinical_annotated011622.xlsx")) %>%
+  select(subject_id = StudySubjectID,
+         age,
+         weightloss5_yn = weighttloss5_yn,
+         ecog_ps = PS_cycle1,
+         bor = `Best overall confirmed response (RECIST)`,
+         ca199 = LAB_CA199_E1_C4,
+         crp = LAB_CRP_E1_C4,
+         bilirubin = LAB_Bilirubin_E1_C4,
+         albumin = LAB_Albumin_E1_C4) %>%
+  mutate(mgps = case_when(crp <= 10 ~ 0,
+                          crp > 10 & albumin >= 35 ~ 1,
+                          crp > 10 & albumin < 35 ~ 2))
+long_c <- read_excel(here("data/clinical_073123.xlsx")) %>%
+  select(subject_id = StudySubjectID,
+         arm = Arm,
+         nivo_start_date = Nivo_StartDate,
+         pfs_date = PFS_date,
+         surv_date = Survival_date,
+         surv_status = Survival_status) %>%
+  mutate(surv_status = case_when(surv_status == 2 ~ "Dead",
+                                 surv_status == 1 ~ "Alive"),
+         arm = factor(arm))
+clin_c <- inner_join(baseline_c, long_c, by = "subject_id")
+
+# Fix the date formats
+for (i in colnames(clin_c)) {
+  if (str_detect(i, "[Dd]ate")) {
+    if (!any(class(clin_c[[i]]) == "POSIXt")) {
+      clin_c[[i]] <- as.Date(as.numeric(clin_c[[i]]), origin = "1899-12-30")
+    } else {
+      clin_c[[i]] <- as.Date(clin_c[[i]])
+    }
+  }
+}
+
+# Compute overall and progression-free survival time
+surv_c <- clin_c %>%
+  mutate(pfs = as.numeric(difftime(pfs_date, nivo_start_date)),
+         os = as.numeric(difftime(surv_date, nivo_start_date))) %>%
+  mutate(death = ifelse(surv_status == "Dead", 1, 0))
+```
+
+
+```{r load_ca199}
+ca199 <- read.csv(here("data/checkpac_ca199.csv")) %>%
+  mutate(visit = ifelse(lab_suffix == "E1_C4",
+                        "baseline",
+                        as.character(cyclenumber)),
+         ca199 = ifelse(ca199 == -999, NA, ca199),
+         subject_id = str_pad(subject_id, 3, "left", "0")) %>%
+  select(-c(lab_suffix, cyclenumber, visit)) %>%
+  drop_na()
+secretor <- ca199 %>%
+  group_by(subject_id) %>%
+  summarize(secretor = all(ca199 > 37))
+is_secretor <- secretor$secretor
+names(is_secretor) <- secretor$subject_id
+
+blood_draw_c <- read.csv(here("data/checkpac_ca199_baseline_p4_dates.csv"))
+blood_draw_bl_and_p1_c <- blood_draw_c %>%
+  filter(!is.na(baseline) & !is.na(endpoint)) %>%
+  select(patient_id, baseline, endpoint) %>%
+  pivot_longer(cols = c("baseline", "endpoint"),
+               names_to = "visit",
+               values_to = "date_blood_draw")
+```
+
+
+```{r combine_clin_ca199}
+exclude_c <- c("CGPLPA225", "CGPLPA783", "CGPLPA795")
+id_map_c <- read_excel(here("data/ID_comparison.xlsx")) %>%
+  filter(!unlist(lapply(CGID, function(x) any(str_detect(x, exclude_c))))) %>%
+  select(patient_id = CGID, subject_id = StudySubjectID) %>%
+  mutate(patient_id = substring(patient_id, 1, 9))
+
+surv_artemis_delfi_c <- surv_c %>%
+  select(-ca199) %>%
+  inner_join(id_map_c) %>%
+  inner_join(blood_draw_bl_and_p1_c) %>%
+  inner_join(ca199,
+             by = join_by("subject_id", "date_blood_draw" == "lab_date")) %>%
+  select(subject_id, patient_id,
+         arm, ca199, bilirubin, age, mgps, ecog_ps, weightloss5_yn, visit,
+         pfs, os, death) %>%
+  pivot_wider(names_from = visit, values_from = ca199) %>%
+  filter(is_secretor[subject_id]) %>%
+  mutate(bilirubin_bin = bilirubin > 25,
+         age_bin = age <= 65,
+         mgps_bin = factor(mgps, levels = c(0, 1, 2)),
+         ecog_ps_bin = ecog_ps == 1,
+         weightloss5_yn_bin = weightloss5_yn == 1)
+```
+
+
+```{r ext-fig16b, fig.width = 12, fig.height = 5, dev = c("png", "pdf")}
+covar_labels <- c("Age, years",
+                  "> 65",
+                  "\u2264 65",
+                  "ECOG PS",
+                  "0",
+                  "1",
+                  "Weight loss, %",
+                  "< 5",
+                  "\u2265 5",
+                  "MGPS",
+                  "0",
+                  "1",
+                  "2",
+                  "Treatment",
+                  "RT+Nivo",
+                  "RT+Nivo/Ipi")
+
+surv_data <- surv_artemis_delfi_c %>%
+  mutate(baseline = scale(baseline)[, 1],
+         endpoint = scale(endpoint)[, 1])
+
+mf <- coxph(Surv(os, death) ~ age_bin + ecog_ps_bin + weightloss5_yn_bin +
+              mgps_bin + arm + baseline + endpoint, surv_data)
+
+var_labels <- c(covar_labels,
+                "CA19-9",
+                "Baseline",
+                "CA19-9",
+                "On-treatment (week 8)")
+
+cox_tb <- get_hr_tbl(surv_data, mf)
+
+print(plot_hr(cox_tb, var_labels = var_labels))
+```
+

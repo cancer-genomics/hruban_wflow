@@ -1,0 +1,183 @@
+---
+title: "Combine TCGA bins with CheckPAC sample coverages / ratios"
+author: "Carlie"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Load packages
+```{r setup, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(here)
+
+source(here("code/functions.R"))
+sel_chr <- readLines(here("data/sel_chr.txt"))
+indir <- here("output/process_tcga_beta.Rmd")
+outdir <- here("output/process_ab.Rmd")
+fs::dir_create(outdir)
+```
+
+Load TCGA bins, LCL and CheckPAC data
+```{r load_data}
+# Load processed TCGA bins
+ref <- readRDS(here(indir, "paad_bins_100kb_sel_chr.rds"))
+ref[, arm := NULL]  # Don't need it…
+
+# Load LCL data
+lymph <- fread(here("extdata/hic_compartments_100kb_ebv_2014.txt"))
+lymph <- lymph[chr == sel_chr]
+
+# Load CheckPAC data (WGMAF) and plasma ratios, coverage
+ic <- fread(here("data/checkpac_meta_ab.csv"))
+ic[, `:=`(tumor = delfi_tf, wbc = 1 - delfi_tf)]
+ic <- ic[, .(id, wbc, tumor)]
+
+cov_panc <- fread(here("data/plasma_panc.csv"))
+cov_heal <- fread(here("data/plasma_healthy.csv"))
+
+cov_panc_l <- melt(cov_panc, id.vars = 1, measure.vars = NULL)
+cov_heal_l <- melt(cov_heal, id.vars = 1, measure.vars = NULL)
+
+# Loading the genomic coordinates from a binned sample
+#bins <- fread(here("data/CGPLPA223P_100kb.csv"))[, .(chr, start, end, bin)]
+bins <- fread(here("data/bins_100kb.csv"))[, .(chr, start, end)]
+# I did not notice that lymphoblast and TCGA bins had different coordinates
+# fixing it here :(
+bins[, `:=`(bin = 1:.N, start = start - 1, end = end - 1)]
+bins <- bins[chr != "chrX"]
+```
+
+Extract pancreatic component using CheckPAC and healthy plasma samples
+```{r compute_pancan}
+# Compute median values not using na.rm = TRUE, NAs are set to 0
+# For CheckPAC samples
+median_panc_coverage <- cov_panc_l[grep("cov_", variable),
+                                   .(value = median(value)),
+                                   by = variable]
+median_panc_coverage[, value := nafill(value, fill = 0)]
+
+median_panc_ratio <- cov_panc_l[grep("ratio_", variable),
+                                .(value = median(value)),
+                                by = variable]
+median_panc_ratio[, value := nafill(value, fill = 0)]
+
+# For Healthy samples
+median_heal_coverage <- cov_heal_l[grep("cov_", variable),
+                                   .(value = median(value)),
+                                   by = variable]
+median_heal_coverage[, value := nafill(value, fill = 0)]
+
+median_heal_ratio <- cov_heal_l[grep("ratio_", variable),
+                                .(value = median(value)),
+                                by = variable]
+median_panc_ratio[, value := nafill(value, fill = 0)]
+
+# "Deconvolve" cancer signal
+deconv_cov_panc_l <- ic[cov_panc_l[median_heal_coverage, on = .(variable)], on = .(id)]
+median_deconv_coverage <- deconv_cov_panc_l[, .(value = median((value - wbc * i.value) / tumor)), by = variable]
+
+deconv_ratio_panc_l <- ic[cov_panc_l[median_heal_ratio, on = .(variable)], on = .(id)]
+median_deconv_ratio <- deconv_ratio_panc_l[, .(value = median((value - wbc * i.value) / tumor)), by = variable]
+```
+
+Assign bins to CheckPAC, healthy and extracted pancreatic components
+```{r bin_assign}
+panc_list <- list(Ratios = cbind(bins, median_panc_ratio)[, eigen := scale(value, scale = TRUE)[, 1]],
+                  Coverage = cbind(bins, median_panc_coverage)[, eigen := scale(value, scale = TRUE)[, 1]])
+panc_tbl <- rbindlist(panc_list, idcol = "feature")
+
+healthy_list <- list(Ratios = cbind(bins, median_heal_ratio)[, eigen := scale(value, scale = TRUE)[, 1]],
+                     Coverage = cbind(bins, median_heal_coverage)[, eigen := scale(value, scale = TRUE)[, 1]])
+healthy_tbl <- rbindlist(healthy_list, idcol = "feature")
+
+deconv_list <- list(Ratios = cbind(bins, median_deconv_ratio)[, eigen := scale(value, scale = TRUE)[, 1]],
+                    Coverage = cbind(bins, median_deconv_coverage)[, eigen := scale(value, scale = TRUE)[, 1]])
+deconv_tbl <- rbindlist(deconv_list, idcol = "feature")
+```
+
+Assign bins to `ref` and `lymph`
+```{r bin_assign_ref}
+ref_bin <- bins[ref, on = .(chr, start, end)]
+lymph_bin <- bins[lymph, on = .(chr, start, end)]
+```
+
+Smoothen the data and update signs if "neccessary"
+```{r smooth_sign}
+#ref_bin[, eigen := .meanSmoother(eigen)]   # If > 1 chr, use by = chr 
+deconv_tbl[, eigen := -1 * .meanSmoother(eigen), by = .(feature, chr)]
+healthy_tbl[, eigen := -1 * .meanSmoother(eigen), by = .(feature, chr)]
+panc_tbl[, eigen := -1 * .meanSmoother(eigen), by = .(feature, chr)]
+#lymph_bin[, eigen := .meanSmoother(eigen)] # If > 1 chr, use by = chr 
+```
+
+Assign open-closed domains to above components
+```{r label_AB}
+panc_tbl[, domain := ifelse(eigen < 0, "open", "closed")]
+panc_tbl[, domain := factor(domain)]
+
+healthy_tbl[, domain := ifelse(eigen < 0, "open", "closed")]
+healthy_tbl[, domain := factor(domain)]
+
+deconv_tbl[, domain := ifelse(eigen < 0, "open", "closed")]
+deconv_tbl[, domain := factor(domain)]
+```
+
+Mark if domains agree with `ref` and `lymph`
+```{r domain_agreement}
+ref_bin <- ref_bin[lymph, on = .(chr, start, end)][, lymph_agree := ifelse(domain == i.domain, "yes", "no")][, lihc_agree := lymph_agree]
+ref_bin[, .(chr, start, end, bin, nprobes, eigen, domain, lihc_agree, lymph_agree)]
+ref_bin <- na.omit(ref_bin)
+
+panc2 <- panc_tbl[ref, on = .(chr, start, end)][, lihc_agree := ifelse(domain == i.domain, "yes", "no")]
+panc2 <- panc2[, .(feature, chr, start, end, bin, variable, value, eigen, domain, lihc_agree)]
+panc3 <- panc2[lymph, on = .(chr, start, end)][, lymph_agree := ifelse(domain == i.domain, "yes", "no")]
+panc4 <- panc3[, .(feature, chr, start, end, bin, variable, value, eigen, domain,
+                   lihc_agree, lymph_agree)]
+panc <- na.omit(panc4)
+
+healthy2 <- healthy_tbl[ref, on = .(chr, start, end)][, lihc_agree := ifelse(domain == i.domain, "yes", "no")]
+healthy2 <- healthy2[, .(feature, chr, start, end, bin, variable, value, eigen, domain, lihc_agree)]
+healthy3 <- healthy2[lymph, on = .(chr, start, end)][, lymph_agree := ifelse(domain == i.domain, "yes", "no")]
+healthy4 <- healthy3[, .(feature, chr, start, end, bin, variable, value, eigen, domain,
+                         lihc_agree, lymph_agree)]
+healthy <- na.omit(healthy4)
+
+deconv2 <- deconv_tbl[ref, on = .(chr, start, end)][, lihc_agree := ifelse(domain == i.domain, "yes", "no")]
+deconv2 <- deconv2[, .(feature, chr, start, end, bin, variable, value, eigen, domain, lihc_agree)]
+deconv3 <- deconv2[lymph, on = .(chr, start, end)][, lymph_agree := ifelse(domain == i.domain, "yes", "no")]
+deconv4 <- deconv3[, .(feature, chr, start, end, bin, variable, value, eigen, domain,
+                       lihc_agree, lymph_agree)]
+deconv <- na.omit(deconv4)
+```
+
+Combine data and mark domains that agree
+```{r combine}
+# Combine all data
+data <- list(`AB Compartments PAAD` = ref_bin,
+             `Extracted Pancreatic component` = deconv_tbl,
+             `Median Healthy Plasma` = healthy_tbl,
+             `Median Pancreatic Plasma` = panc_tbl,
+             `EBV transformed lymphoblast HiC` = lymph_bin)
+data_tbl <- rbindlist(data, idcol = "source", fill = TRUE)
+
+# Label source2 = source + feature
+data_tbl[, feature := ifelse(is.na(feature), "", feature)]
+data_tbl[, source2 := str_trim(paste(source, feature))]
+
+# Select needed columns and drop NAs
+data_tbl <- data_tbl[, .(source2, source, feature, chr, start, end, bin,
+                         nprobes, eigen, domain, lihc_agree, lymph_agree)]
+data_tbl <- na.omit(data_tbl, cols = "eigen")
+
+# Keep same bins across data sets (N = 8)
+common_bins <- data_tbl[, .(nbin = .N), by = .(chr, start, end)]
+common_bins <- common_bins[, .(keep = nbin == 8), by = .(chr, start, end)]
+data_tbl <- data_tbl[common_bins[keep == TRUE], on = .(chr, start, end)]
+
+# Fill the missing self-agreement on `ref` and `lymph` with "yes"
+data_tbl[, `:=`(lihc_agree = ifelse(is.na(lihc_agree), "yes", lihc_agree),
+                lymph_agree = ifelse(is.na(lymph_agree), "yes", lymph_agree))]
+
+saveRDS(data_tbl, here(outdir, "combined_bins.rds"))
+```

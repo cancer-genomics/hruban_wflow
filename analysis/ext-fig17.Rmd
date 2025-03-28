@@ -1,0 +1,48 @@
+---
+title: ichorCNA shows limited correlation with clinical response and does not stratify progression free and overall survival
+---
+
+
+Boxplot showing ichorCNA tumor fraction, sorted by baseline, and follow-up for patients with PD, SD, and PR. Wilcoxon P-values are indicated above each comparison.
+
+
+```{r packages, message = FALSE}
+library(here)
+library(readxl)
+library(tidyverse)
+library(ggpubr)
+```
+
+
+```{r load_data}
+clean_data <- read_excel(here("data/supplementary_tables.xlsx"), sheet = "Table S1",range = "A2:X45")
+delfi_pred <- read_excel(here("data/supplementary_tables.xlsx"), sheet = "Table S2",range = "A2:P219")
+```
+
+
+```{r ext-fig17, fig.width=3.5, fig.height=7, dev = c("png", "pdf")}
+delfi_pred <- delfi_pred %>%
+  filter(Timepoint != "follow up", Timepoint != "cycle 1", IchorCNA != "-")
+delfi_pred$IchorCNA <- as.numeric(delfi_pred$IchorCNA)
+
+DELFI_complete <- delfi_pred %>%
+  inner_join(clean_data, by = "Patient") %>%
+  mutate(class = case_when((Timepoint == "Baseline") ~ "Baseline",
+                           TRUE ~ `BOR RECIST 1.1`)) %>%
+  filter(`BOR RECIST 1.1` != "Not Evaluable") %>%
+  mutate(class = case_when((class == "Baseline") ~ "Baseline",
+                           (class == "Stable Disease") ~ "SD",
+                           (class == "Partial Response") ~ "PR",
+                           (class == "Progressive Disease") ~ "PD"),
+         class = factor(class, levels = c("Baseline", "PD", "SD", "PR")))
+
+my_comparisons <- list(c("SD", "PR"), c("PD", "PR"), c("Baseline", "PR"))
+
+ggplot(DELFI_complete, aes(x = class, y = IchorCNA, fill = class)) +
+  geom_boxplot(outlier.shape = NA) +
+  stat_compare_means(comparisons = my_comparisons) +
+  ylab("IchorCNA") +
+  theme_classic() +
+  scale_fill_manual(values = c("#C77CFF", "#F8766D", "#00BFC4", "#7CAE00")) +
+  geom_point(alpha = 1/3, position = position_jitter(0.2), size = .8)
+```

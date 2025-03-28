@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Change in DELFI-TF scores between baseline and 8 week time point scores are predictive of progression free and overall survival in CheckPAC trial</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">hruban_wflow</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Change in DELFI-TF scores between baseline
+and 8 week time point scores are predictive of progression free and
+overall survival in CheckPAC trial</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2025-03-27
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>hruban_wflow/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown file has staged changes. To know which version of the
+R Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250319code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250319)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250319code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250319)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong6dc79eb">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong> 6dc79eb
+</a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong6dc79eb"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 6dc79eb.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    code/rlucas/.DS_Store
+
+Untracked files:
+    Untracked:  README.Rmd
+    Untracked:  data/120122_mutations.csv
+    Untracked:  data/CA199.csv
+    Untracked:  data/CP_PAC_artemis.xlsx
+    Untracked:  data/CheckPAC_clinical_annotated011622.xlsx
+    Untracked:  data/Checkpac_Test.csv
+    Untracked:  data/Expected.csv
+    Untracked:  data/ID_comparison.xlsx
+    Untracked:  data/Locked_Models/
+    Untracked:  data/PACTO Masterfile.xlsx
+    Untracked:  data/PACTO_BL_EOT_EOS_PFS_TA_jh.xlsx
+    Untracked:  data/Test_set_pacto.csv
+    Untracked:  data/allfeatures_pacto.5mb.hg19.csv
+    Untracked:  data/artemis.csv
+    Untracked:  data/barv1.csv
+    Untracked:  data/cellularity.csv
+    Untracked:  data/checkpac_5mb_bins/
+    Untracked:  data/checkpac_baseline_p2_dates.csv
+    Untracked:  data/checkpac_bins.csv
+    Untracked:  data/checkpac_ca199.csv
+    Untracked:  data/checkpac_ca199_baseline_p4_dates.csv
+    Untracked:  data/checkpac_features.csv
+    Untracked:  data/checkpac_plasma_manifest.xlsx
+    Untracked:  data/clinical_073123.xlsx
+    Untracked:  data/combined_bins_102324.rds
+    Untracked:  data/df_results_CAIRO5_2_6_ checkpac_ pacto.tsv
+    Untracked:  data/estimates/
+    Untracked:  data/fig2c_p2_data.rds
+    Untracked:  data/for_leal_plot_042324.xlsx
+    Untracked:  data/fp2_lucas_healthy.csv
+    Untracked:  data/i07_input.xlsx
+    Untracked:  data/loadings.rds
+    Untracked:  data/long_bins.csv
+    Untracked:  data/pacto_5mb_bins/
+    Untracked:  data/pacto_bins.csv
+    Untracked:  data/pacto_features.csv
+    Untracked:  data/sel_chr.txt
+    Untracked:  data/supplementary_tables.xlsx
+    Untracked:  data/tumor_tmb.txt
+    Untracked:  extdata/
+    Untracked:  output/process_tcga_beta.Rmd/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   README.md
+
+Staged changes:
+    Modified:   analysis/about.Rmd
+    New:        analysis/ext-fig1.Rmd
+    New:        analysis/ext-fig10.Rmd
+    New:        analysis/ext-fig11.Rmd
+    New:        analysis/ext-fig12.Rmd
+    New:        analysis/ext-fig13.Rmd
+    New:        analysis/ext-fig14.Rmd
+    New:        analysis/ext-fig15.Rmd
+    New:        analysis/ext-fig16a.Rmd
+    New:        analysis/ext-fig16b.Rmd
+    New:        analysis/ext-fig17.Rmd
+    New:        analysis/ext-fig18.Rmd
+    New:        analysis/ext-fig19.Rmd
+    New:        analysis/ext-fig20.Rmd
+    New:        analysis/ext-fig21a.Rmd
+    New:        analysis/ext-fig21b.Rmd
+    New:        analysis/ext-fig22a.Rmd
+    New:        analysis/ext-fig22b.Rmd
+    New:        analysis/ext-fig23a.Rmd
+    New:        analysis/ext-fig23b.Rmd
+    New:        analysis/ext-fig24.Rmd
+    New:        analysis/ext-fig2a.Rmd
+    New:        analysis/ext-fig2b.Rmd
+    New:        analysis/ext-fig3.Rmd
+    New:        analysis/ext-fig4.Rmd
+    New:        analysis/ext-fig5.Rmd
+    New:        analysis/ext-fig6.Rmd
+    New:        analysis/ext-fig7.Rmd
+    New:        analysis/ext-fig8.Rmd
+    New:        analysis/ext-fig9.Rmd
+    New:        analysis/fig1a.Rmd
+    New:        analysis/fig1b.Rmd
+    New:        analysis/fig2a.Rmd
+    New:        analysis/fig2b.Rmd
+    New:        analysis/fig2c.Rmd
+    New:        analysis/fig3a.Rmd
+    New:        analysis/fig3b.Rmd
+    New:        analysis/fig4.Rmd
+    New:        analysis/fig5.Rmd
+    New:        analysis/fig6a.Rmd
+    New:        analysis/fig6b.Rmd
+    New:        analysis/fig6c.Rmd
+    New:        analysis/fig7a.Rmd
+    New:        analysis/fig7b.Rmd
+    New:        analysis/fig8.Rmd
+    New:        analysis/fig9a.Rmd
+    New:        analysis/fig9b.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/license.Rmd
+    New:        code/functions.R
+    New:        code/hr_plot_funcs.R
+    New:        code/liver.tools/DESCRIPTION
+    New:        code/liver.tools/NAMESPACE
+    New:        code/liver.tools/R/functions.R
+    New:        code/liver.tools/R/help.R
+    New:        code/liver.tools/man/liver.tools.Rd
+    New:        code/liver.tools/zzz.R
+    New:        code/pivot_wider_pacto.R
+    New:        code/process_ab.Rmd
+    New:        code/process_tcga_beta.Rmd
+    New:        code/rlucas/DESCRIPTION
+    New:        code/rlucas/NAMESPACE
+    New:        code/rlucas/R/functions.R
+    New:        code/rlucas/R/help.R
+    New:        code/rlucas/data-derived/SummarizedExperiment.R
+    New:        code/rlucas/data/lucas_5mb.rda
+    New:        code/rlucas/data/metadata.rda
+    New:        code/rlucas/data/prediction_lucas.rda
+    New:        code/rlucas/data/se.rda
+    New:        code/rlucas/data/valid_metadata.rda
+    New:        code/rlucas/inst/extdata/survival_analysis_samples.xlsx
+    New:        code/rlucas/man/rlucas.Rd
+    New:        code/useful.stuff.aa/DESCRIPTION
+    New:        code/useful.stuff.aa/NAMESPACE
+    New:        code/useful.stuff.aa/R/convenience.R
+    New:        code/useful.stuff.aa/R/models.R
+    New:        code/useful.stuff.aa/data/liver_meta.rda
+    New:        code/useful.stuff.aa/data/lucas_meta.rda
+    New:        code/utility_funcs.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<p>Multivariate cox proportional hazard analyses were generated for
+DELFI-TF and fit to overall survival adjusting for clinical subgroups.
+Each of the indicated subgroups that have been shown to be significant
+on univariate analyses in previous studies(7) have been included in the
+multivariate analysis. Hazard ratios and P values are indicated on the
+right for individuals in the CheckPAC study</p>
+<pre class="r"><code>library(here)
+library(readxl)
+library(survival)
+source(here(&quot;code/hr_plot_funcs.R&quot;))</code></pre>
+<pre class="r"><code>baseline_c &lt;- read_excel(&quot;data/CheckPAC_clinical_annotated011622.xlsx&quot;) %&gt;%
+  select(subject_id = StudySubjectID,
+         age,
+         weightloss5_yn = weighttloss5_yn,
+         ecog_ps = PS_cycle1,
+         bor = `Best overall confirmed response (RECIST)`,
+         ca199 = LAB_CA199_E1_C4,
+         crp = LAB_CRP_E1_C4,
+         bilirubin = LAB_Bilirubin_E1_C4,
+         albumin = LAB_Albumin_E1_C4) %&gt;%
+  mutate(mgps = case_when(crp &lt;= 10 ~ 0,
+                          crp &gt; 10 &amp; albumin &gt;= 35 ~ 1,
+                          crp &gt; 10 &amp; albumin &lt; 35 ~ 2))
+long_c &lt;- read_excel(&quot;data/clinical_073123.xlsx&quot;) %&gt;%
+  select(subject_id = StudySubjectID,
+         arm = Arm,
+         nivo_start_date = Nivo_StartDate,
+         pfs_date = PFS_date,
+         surv_date = Survival_date,
+         surv_status = Survival_status) %&gt;%
+  mutate(surv_status = case_when(surv_status == 2 ~ &quot;Dead&quot;,
+                                 surv_status == 1 ~ &quot;Alive&quot;),
+         arm = factor(arm))
+clin_c &lt;- inner_join(baseline_c, long_c, by = &quot;subject_id&quot;)
+
+# Fix the date formats
+for (i in colnames(clin_c)) {
+  if (str_detect(i, &quot;[Dd]ate&quot;)) {
+    if (!any(class(clin_c[[i]]) == &quot;POSIXt&quot;)) {
+      clin_c[[i]] &lt;- as.Date(as.numeric(clin_c[[i]]), origin = &quot;1899-12-30&quot;)
+    } else {
+      clin_c[[i]] &lt;- as.Date(clin_c[[i]])
+    }
+  }
+}
+
+# Compute overall and progression-free survival time
+surv_c &lt;- clin_c %&gt;%
+  mutate(pfs = as.numeric(difftime(pfs_date, nivo_start_date)),
+         os = as.numeric(difftime(surv_date, nivo_start_date))) %&gt;%
+  mutate(death = ifelse(surv_status == &quot;Dead&quot;, 1, 0))</code></pre>
+<pre class="r"><code># Load the DELFI TF scores
+delfi_tf &lt;- read_delim(&quot;data/df_results_CAIRO5_2_6_ checkpac_ pacto.tsv&quot;) %&gt;%
+  setNames(c(&quot;indx&quot;, &quot;id&quot;, &quot;score&quot;)) %&gt;%
+  select(-indx)</code></pre>
+<pre><code>New names:
+Rows: 422 Columns: 3
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: &quot;\t&quot; chr
+(1): sample_id dbl (2): ...1, DELFI_TF_CAIRO5_2.6
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...1`</code></pre>
+<pre class="r"><code># Select baseline and two-week visit timepoints
+blood_draw_c &lt;- read_excel(&quot;data/checkpac_plasma_manifest.xlsx&quot;) %&gt;%
+  select(cgid = `Sample ID*`, patient_id = Patient, date_blood_draw = Date) %&gt;%
+  mutate(date_blood_draw = as.Date(date_blood_draw))
+# See &quot;/dcs05/scharpf/data/skoul/Projects/checkpac/patient_selection&quot; for more
+# information
+blood_draw_c[blood_draw_c$cgid == &quot;CGPLPA223P16&quot;,
+             &quot;date_blood_draw&quot;] &lt;- as.Date(&quot;2019-12-20&quot;)
+blood_draw_c[blood_draw_c$cgid == &quot;CGPLPA794P4&quot;,
+             &quot;date_blood_draw&quot;] &lt;- as.Date(&quot;2020-02-21&quot;)
+blood_draw_bl_or_p2_c &lt;- blood_draw_c %&gt;%
+  mutate(visit = str_extract(cgid, &quot;(?&lt;=CG[A-Z]{1,5}[0-9]{1,5}P).*&quot;),
+         visit = sapply(visit, function(x) str_split(x, &quot;_&quot;)[[1]][1])) %&gt;%
+  filter(visit == &quot;&quot; | visit == &quot;2&quot;)
+blood_draw_bl_and_p2_c &lt;- blood_draw_bl_or_p2_c %&gt;%
+  filter(patient_id %in% pull(filter(count(group_by(blood_draw_bl_or_p2_c,
+                                                    patient_id)),
+                                     n &gt; 1),
+                              patient_id))
+
+# Join the scores with timepoint
+delfi_tf_blp2_c &lt;- inner_join(delfi_tf, blood_draw_bl_and_p2_c,
+                              by = join_by(id == cgid)) %&gt;%
+  mutate(visit = ifelse(visit == &quot;&quot;, &quot;baseline&quot;, &quot;ontreatment&quot;))</code></pre>
+<pre class="r"><code>exclude_c &lt;- c(&quot;CGPLPA225&quot;, &quot;CGPLPA783&quot;, &quot;CGPLPA795&quot;)
+id_map_c &lt;- read_excel(&quot;data/ID_comparison.xlsx&quot;) %&gt;%
+  filter(!unlist(lapply(CGID, function(x) any(str_detect(x, exclude_c))))) %&gt;%
+  select(patient_id = CGID, subject_id = StudySubjectID) %&gt;%
+  mutate(patient_id = substring(patient_id, 1, 9))
+
+surv_delfi_tf_c &lt;- surv_c %&gt;%
+  inner_join(id_map_c) %&gt;%
+  inner_join(delfi_tf_blp2_c) %&gt;%
+  select(subject_id, patient_id, score,
+         arm, ca199, bilirubin, age, mgps, ecog_ps, weightloss5_yn, visit,
+         pfs, os, death) %&gt;%
+  pivot_wider(names_from = visit, values_from = score) %&gt;%
+  mutate(bilirubin_bin = bilirubin &gt; 25,
+         age_bin = age &lt;= 65,
+         mgps_bin = factor(mgps, levels = c(0, 1, 2)),
+         ecog_ps_bin = ecog_ps == 1,
+         ca199_bin = ca199 &gt; 37,
+         weightloss5_yn_bin = weightloss5_yn == 1)</code></pre>
+<pre><code>Joining with `by = join_by(subject_id)`
+Joining with `by = join_by(patient_id)`</code></pre>
+<pre class="r"><code># Data for fitting the models
+surv_data &lt;- surv_delfi_tf_c %&gt;%
+  mutate(pch = (ontreatment - baseline) / baseline,
+         pch_gt0 = ifelse(pch &gt; 0, &quot;NR&quot;, &quot;R&quot;),
+         baseline_std = scale(baseline, center = TRUE, scale = TRUE),
+         ontreatment_std = scale(ontreatment, center = TRUE, scale = TRUE))</code></pre>
+<pre class="r"><code>covar_labels &lt;- c(&quot;Age, years&quot;,
+                  &quot;&gt; 65&quot;,
+                  &quot;\u2264 65&quot;,
+                  &quot;ECOG PS&quot;,
+                  &quot;0&quot;,
+                  &quot;1&quot;,
+                  &quot;Weight loss, %&quot;,
+                  &quot;&lt; 5&quot;,
+                  &quot;\u2265 5&quot;,
+                  &quot;MGPS&quot;,
+                  &quot;0&quot;,
+                  &quot;1&quot;,
+                  &quot;2&quot;,
+                  &quot;Treatment&quot;,
+                  &quot;RT+Nivo&quot;,
+                  &quot;RT+Nivo/Ipi&quot;)
+
+# Inc-dec model
+var_labels &lt;- c(&quot;DELFI TF&quot;,
+                &quot;Non-responder&quot;,
+                &quot;Responder&quot;)
+
+# Fit overall survival to inc-dec Delfi TF values
+mf &lt;- coxph(Surv(os, death) ~ age_bin + ecog_ps_bin + weightloss5_yn_bin +
+              mgps_bin + arm + pch_gt0, surv_data)
+cox_os &lt;- get_hr_tbl(surv_data, mf)
+print(plot_hr(cox_os, var_labels = c(covar_labels, var_labels)))</code></pre>
+<pre><code>Warning: Removed 7 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+<pre><code>Warning: Removed 20 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+<p><img src="figure/ext-fig21b.Rmd/ext-fig21b-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Fit progression-free survival to inc-dec Delfi TF values
+mf &lt;- coxph(Surv(pfs, death) ~ age_bin + ecog_ps_bin + weightloss5_yn_bin +
+              mgps_bin + arm + pch_gt0, surv_data)
+cox_pfs &lt;- get_hr_tbl(surv_data, mf)
+print(plot_hr(cox_pfs, var_labels = c(covar_labels, var_labels)))</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.4.1 (2024-06-14)
+Platform: aarch64-apple-darwin20
+Running under: macOS 15.3.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+time zone: America/New_York
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] patchwork_1.3.0 lubridate_1.9.4 forcats_1.0.0   stringr_1.5.1  
+ [5] dplyr_1.1.4     purrr_1.0.4     readr_2.1.5     tidyr_1.3.1    
+ [9] tibble_3.2.1    ggplot2_3.5.1   tidyverse_2.0.0 survival_3.8-3 
+[13] readxl_1.4.5    here_1.0.1      workflowr_1.7.1
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.6      xfun_0.51         bslib_0.9.0       processx_3.8.6   
+ [5] lattice_0.22-6    callr_3.7.6       tzdb_0.4.0        vctrs_0.6.5      
+ [9] tools_4.4.1       ps_1.9.0          generics_0.1.3    parallel_4.4.1   
+[13] pkgconfig_2.0.3   Matrix_1.7-3      lifecycle_1.0.4   compiler_4.4.1   
+[17] farver_2.1.2      git2r_0.35.0      munsell_0.5.1     getPass_0.2-4    
+[21] httpuv_1.6.15     htmltools_0.5.8.1 sass_0.4.9        yaml_2.3.10      
+[25] crayon_1.5.3      later_1.4.1       pillar_1.10.1     jquerylib_0.1.4  
+[29] whisker_0.4.1     cachem_1.1.0      tidyselect_1.2.1  digest_0.6.37    
+[33] stringi_1.8.4     labeling_0.4.3    splines_4.4.1     rprojroot_2.0.4  
+[37] fastmap_1.2.0     grid_4.4.1        colorspace_2.1-1  cli_3.6.4        
+[41] magrittr_2.0.3    withr_3.0.2       scales_1.3.0      promises_1.3.2   
+[45] bit64_4.6.0-1     timechange_0.3.0  rmarkdown_2.29    httr_1.4.7       
+[49] bit_4.6.0         cellranger_1.1.0  hms_1.1.3         evaluate_1.0.3   
+[53] knitr_1.49        rlang_1.1.5       Rcpp_1.0.14       glue_1.8.0       
+[57] rstudioapi_0.17.1 vroom_1.6.5       jsonlite_1.9.1    R6_2.6.1         
+[61] fs_1.6.5         </code></pre>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

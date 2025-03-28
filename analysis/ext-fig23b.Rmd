@@ -1,0 +1,88 @@
+---
+title: ARTEMIS-DELFI scores predict survival for patients in PACTO trial
+---
+
+
+Kaplan-Meier curves of progression free survival probability and overall survival probability based on fast-fail landmark ARTEMIS-DELFI score after one cycle of treatment. Patients are classified as responders or non-responders if follow-up ARTEMIS-DELFI scores are below or above the median follow-up score, respectively.
+
+
+```{r packages, message = FALSE}
+library(here)
+library(tidyverse)
+library(ggpubr)
+library(survival)
+library(survminer)
+library(readxl)
+```
+
+
+```{r load_data}
+clean_data <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S4", range = "A2:T42")
+delfi_pred <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S5", range = "A2:L207")
+```
+
+
+```{r ext-fig23b, fig.height = 7, fig.width = 15, dev = c("png", "pdf")}
+delfi_pred <- delfi_pred %>%
+  filter(Timepoint=="cycle 1",`ARTEMIS-DELFI Score`!="-")
+delfi_pred$`ARTEMIS-DELFI Score`<-as.numeric(delfi_pred$`ARTEMIS-DELFI Score`)
+DELFI_complete<-inner_join(delfi_pred,clean_data, by="Patient")
+DELFI_complete<-DELFI_complete %>%
+  mutate(class1 = case_when((`ARTEMIS-DELFI Score` >= .965) ~ "nonresponder",
+                            .default = "responder"))
+DELFI_complete$Deceased <- "1"
+DELFI_complete$`OS (days)`<-as.numeric(DELFI_complete$`OS (days)`)
+DELFI_complete$`PFS (days)`<-as.numeric(DELFI_complete$`PFS (days)`)
+DELFI_complete$Deceased<-as.numeric(DELFI_complete$Deceased)
+
+p <- vector("list", 2)
+
+fit <- survfit(Surv(`PFS (days)`, Deceased) ~ class1, data=DELFI_complete)
+
+p[[1]] <- fit %>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.col = "strata",
+             surv.median.line = "hv",
+             #title="",
+             ylab="Progression free survival probability",
+             xlab="Time in Days",
+             ggtheme = theme_classic2(base_size=11),
+             legend = c(.9,.75),
+             legend.labs=c("nonresponder","responder"),
+             legend.title=element_blank(),
+             pval.size=3,
+             pval.coord = c(400, .25),tables.y.text = FALSE)
+
+p[[1]]$plot <- p[[1]]$plot +
+  annotate("text", x = 500, y = 0.95,
+           label = "ARTEMIS-DELFI molecular\nassessment (4 weeks)",
+           size = 3, hjust = 0)
+
+fit <- survfit(Surv(`OS (days)`, Deceased) ~ class1, data=DELFI_complete)
+
+p[[2]] <- fit %>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.col = "strata",
+             surv.median.line = "hv",
+             #title="",
+             xlab="Time in Days",
+             ylab="Overall survival probability",
+             ggtheme = theme_classic2(base_size=11),
+             legend = c(.9,.75),
+             legend.labs=c("nonresponder","responder"),
+             legend.title=element_blank(),
+             pval.size=3, pval.coord = c(600, .25),tables.y.text = FALSE)
+
+p[[2]]$plot <- p[[2]]$plot +
+  annotate("text", x = 750, y = 0.95,
+           label = "ARTEMIS-DELFI molecular\nassessment (4 weeks)",
+           size = 3, hjust = 0)
+
+arrange_ggsurvplots(p, nrow = 1)
+
+coxPFS <- coxph(Surv(`PFS (days)`, Deceased) ~ class1, data = DELFI_complete)
+summary(coxPFS)
+
+coxOS <- coxph(Surv(`OS (days)`, Deceased) ~ class1, data = DELFI_complete)
+summary(coxOS)
+```

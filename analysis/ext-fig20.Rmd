@@ -1,0 +1,99 @@
+---
+title: Change in WGMAF value stratifies progression free but not overall survival at 8-week timepoint in CheckPAC trial
+---
+
+
+Kaplan-Meier curves of progression free survival probability and overall survival probability based on increase or decrease in WGMAF at 8-week timepoint.
+
+
+```{r packages, message = FALSE}
+library(ggpubr)
+library(here)
+library(readxl)
+library(survival)
+library(survminer)
+library(tidyverse)
+```
+
+
+```{r load_data}
+clean_data <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S1", range = "A2:X45")
+WGMAF_pred <- read_excel(here("data/supplementary_tables.xlsx"),
+                          sheet = "Table S2", range = "A2:N219")
+excluded_ids <- c("CGPLPA796", "CGPLPA792", "CGPLPA791", "CGPLPA773",
+                  "CGPLPA779", "CGPLPA226", "CGPLPA222")
+```
+
+
+```{r ext-fig20, fig.height = 7, fig.width = 15, dev = c("png", "pdf")}
+WGMAF_pred_endpoint <- WGMAF_pred %>%
+  filter(!Patient %in% excluded_ids,
+         Timepoint == "Endpoint", WGMAF != "-") %>%
+  mutate(WGMAF = as.numeric(WGMAF))
+WGMAF_pred_baseline <- WGMAF_pred %>%
+  filter(!Patient %in% excluded_ids,
+         Timepoint == "Baseline", WGMAF != "-") %>%
+  mutate(WGMAF = as.numeric(WGMAF))
+
+WGMAF_complete <- WGMAF_pred_endpoint %>%
+  select(Patient, WGMAF) %>%
+  inner_join(select(WGMAF_pred_baseline, Patient, WGMAF), by = "Patient",
+             suffix = c("_endpoint", "_baseline")) %>%
+  inner_join(clean_data, by = "Patient") %>%
+  mutate(mag = WGMAF_baseline / WGMAF_endpoint,
+         cutoff1 = ifelse(mag >=1, "Responder", "Nonresponder")) %>%
+  mutate(across('Death', str_replace, 'Yes', '1'),
+        across('Death', str_replace, 'No', '0'))
+WGMAF_complete$`OS (days)` <- as.numeric(WGMAF_complete$`OS (days)`)
+WGMAF_complete$`PFS (days)` <- as.numeric(WGMAF_complete$`PFS (days)`)
+WGMAF_complete$Deceased <- as.numeric(WGMAF_complete$Death)
+
+p <- vector("list", 2)
+
+fit <- survfit(Surv(`PFS (days)`, Deceased) ~ cutoff1, data=WGMAF_complete)
+
+p[[1]] <- fit %>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.col = "strata",
+             surv.median.line = "hv",
+             #title="Progression free survival based on WGMAF change ",
+             ylab="Progression free survival probability",
+             xlab="Time in Days",
+             ggtheme = theme_classic2(base_size=11),
+             legend = c(.9,.75),
+             legend.title= element_blank(),
+             legend.labs=c("nonresponder","responder"),
+             pval.size=3, pval.coord = c(1800, .25),tables.y.text = FALSE)
+
+p[[1]]$plot <- p[[1]]$plot +
+  annotate("text", x = 1650, y = 0.9,
+           label = "Change in WGMAF molecular\nassessment (8 weeks)",
+           size = 3, hjust = 0)
+
+fit <- survfit(Surv(`OS (days)`, Deceased) ~ cutoff1, data=WGMAF_complete)
+
+p[[2]] <- fit %>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.col = "strata",
+             surv.median.line = "hv",
+             #title="Overall survival based on WGMAF change ",
+             xlab="Time in Days",
+             ylab="Overall survival probability",
+             ggtheme = theme_classic2(base_size=11),
+             legend = c(.9,.75),
+             legend.title=element_blank(),
+             legend.labs=c("nonresponder","responder"),
+             pval.size=3, pval.coord = c(1800, .25),tables.y.text = FALSE)
+
+p[[2]]$plot <- p[[2]]$plot +
+  annotate("text", x = 1650, y = 0.9,
+           label = "Change in WGMAF molecular\nassessment (8 weeks)",
+           size = 3, hjust = 0)
+
+arrange_ggsurvplots(p, nrow = 1)
+
+coxPFS <- coxph(Surv(`PFS (days)`, Deceased) ~ cutoff1, data = WGMAF_complete)
+summary(coxPFS)
+
+coxOS <- coxph(Surv(`OS (days)`, Deceased) ~ cutoff1, data = WGMAF_complete)
+summary(coxOS)
+```

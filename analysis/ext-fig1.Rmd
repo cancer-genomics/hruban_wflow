@@ -1,0 +1,16 @@
+---
+title: Flowchart of sample selection for WGMAF and ARTEMIS-DELFI analyses  
+---
+
+
+Charts showing criteria for inclusion and exclusion as well as analyses performed using patient samples from the (A) CheckPAC and (B) PACTO trials.
+
+
+```{r packages, message = FALSE}
+library(here)
+```
+
+
+```{r ext-fig1, echo=FALSE, out.width = "100%"}
+knitr::include_graphics("assets/ext-fig1.png", error = FALSE)
+```

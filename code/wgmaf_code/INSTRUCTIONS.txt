@@ -1,0 +1,13 @@
+The code in ./scripts generate WGMAF values. Shell scripts were run using the Sun Grid Engine (SGE) computing system and 
+and contain options that were passed to the 'qsub' command at the top of the script. For a detailed description of these options, please see
+the SGE manual (https://gridscheduler.sourceforge.net/htmlman/manuals.html). Note that file paths are relative to the ./scripts directory.
+
+Scripts must be run in the following order:
+
+i01-get-gnomad.sh (runs i01-get-gnomad.R)
+i02-get-liftover-chain.sh
+i03-strelka.sh
+i04-plasma-sbs-detection.sh (runs i04-plasma-sbs-detection.R)
+i05-compute-wgmaf.R
+
+

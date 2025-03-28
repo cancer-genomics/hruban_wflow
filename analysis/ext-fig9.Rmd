@@ -1,0 +1,188 @@
+---
+title: Feature importance for locked ARTEMIS-DELFI machine learning model
+---
+
+
+Scaled coefficients are indicated along y axis for each feature along x axis. Features are colored by feature type.
+
+
+```{r packages, message = FALSE}
+library(caret)
+library(cowplot)
+library(data.table)
+library(glmnet)
+library(ggpubr)
+library(here)
+library(pROC)
+library(recipes)
+library(tidyverse)
+devtools::load_all(here("code/useful.stuff.aa"))
+source(here("code/functions.R"))
+```
+
+
+```{r load_data}
+# These are the models we actually want
+model <- readRDS(here("data/Locked_Models",
+                      "ARTEMIS_single_DELFI_SSLs_Ensemble.rds"))
+# The retained things are artemis score, ratios and zscores
+
+# I have to generate some SSL scores though to use:
+s2 <- readRDS(here("data/Locked_Models", "zscores_ssl.rds"))
+s3 <- readRDS(here("data/Locked_Models", "Ratios_ssl.rds"))
+s4 <- readRDS(here("data/Locked_Models", "ARTEMIS_Ensemble.rds"))
+
+# ARTEMIS kept epi, line, ltr, RNA, Sat
+m1 <- readRDS(here("data/Locked_Models", "Epi_ssl.rds"))
+m2 <- readRDS(here("data/Locked_Models", "LINE_ssl.rds"))
+m3 <- readRDS(here("data/Locked_Models", "LTR_ssl.rds"))
+m4 <- readRDS(here("data/Locked_Models", "RNA_TE_ssl.rds"))
+m5 <- readRDS(here("data/Locked_Models", "Sat_ssl.rds"))
+```
+
+
+```{r extract_coef}
+# ARTEMIS score, zscores, ratios
+joint <- get_coefs(model) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "artemis-delfi")
+delfi1 <- get_coefs(s2) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "DELFI", cat = "zscores")
+delfi2 <- get_coefs(s3) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "DELFI", cat = "ratios")
+
+art <- get_coefs(s4) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "ARTEMIS", cat = "ensemble")
+
+# Epi, line, ltr, te, sat
+epi <- get_coefs(m1) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "ARTEMIS", cat = "Epigenetic")
+line <- get_coefs(m2) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "ARTEMIS", cat = "Repeats - LINE")
+ltr <- get_coefs(m3) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "ARTEMIS", cat = "Repeats - LTR")
+te <- get_coefs(m4) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "ARTEMIS", cat = "Repeats - TE")
+sat <- get_coefs(m5) %>%
+  select(features, scaled_coefs) %>%
+  mutate(model = "ARTEMIS", cat = "Repeats - Satellite")
+
+# Multiply each delfi feature by it's coef in joint model
+r <- (joint %>% filter(features == "Ratios_ssl"))$scaled_coefs
+z <- (joint %>% filter(features == "zscores_ssl"))$scaled_coefs
+a <- (joint %>% filter(features == "Artemis_Score"))$scaled_coefs
+
+all_features <- delfi1 %>% mutate(scaled_coefs = scaled_coefs * z)
+all_features2 <- delfi2 %>% mutate(scaled_coefs = scaled_coefs * r)
+all_features <- rbind(all_features, all_features2)
+all_features <- all_features %>%
+  mutate(cat = ifelse(grepl("zscore", features),
+                      "Chromosomal Change", "Fragmentation PC"))
+
+# epi
+c <- (art %>% filter(features == "Epi_ssl"))$scaled_coefs
+dat <- epi %>% mutate(scaled_coefs = scaled_coefs * c * a)
+all_features <- rbind(all_features, dat)
+
+# line
+c <- (art %>% filter(features == "LINE_ssl"))$scaled_coefs
+dat <- line %>% mutate(scaled_coefs = scaled_coefs * c * a)
+all_features <- rbind(all_features, dat)
+
+# ltr
+c <- (art %>% filter(features == "LTR_ssl"))$scaled_coefs
+dat <- ltr %>% mutate(scaled_coefs = scaled_coefs * c * a)
+all_features <- rbind(all_features, dat)
+
+# te
+c <- (art %>% filter(features == "RNA_TE_ssl"))$scaled_coefs
+dat <- te %>% mutate(scaled_coefs = scaled_coefs * c * a)
+all_features <- rbind(all_features, dat)
+
+# sat
+c <- (art %>% filter(features == "Sat_ssl"))$scaled_coefs
+dat <- sat %>% mutate(scaled_coefs = scaled_coefs * c * a)
+all_features <- rbind(all_features, dat)
+```
+
+```{r legend}
+colors <- c("maroon3",
+            "mediumpurple3",
+            "mediumorchid3",
+            "darkmagenta",
+            "blueviolet",
+            "darkorange2",
+            "turquoise4")
+feat_classes <- c("Epigenetic",
+                  "Repeats - LINE",
+                  "Repeats - LTR",
+                  "Repeats - TE",
+                  "Repeats - Satellite",
+                  "Fragmentation PC",
+                  "Chromosomal Change")
+feat_order <- feat_classes[c(7, 1, 6, 2, 3, 5, 4)]
+feat_colors <- colors[c(7, 1, 6, 2, 3, 5, 4)]
+
+all_features2 <- all_features
+tot <- sum(abs(all_features2$scaled_coefs))
+
+all_features2 <- all_features2 %>%
+  group_by(cat) %>%
+  summarize(perc = sum(abs(scaled_coefs)) / tot)
+
+all_features2$cat <- factor(all_features2$cat, levels = feat_order)
+
+all_features2$ymax <- cumsum(all_features2$perc)
+all_features2$ymin <- c(0, head(all_features2$ymax, n = -1))
+
+circ_legend <- all_features2 %>%
+  ggplot(aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3, fill = cat)) +
+  geom_rect() +
+  coord_polar(theta = "y") +
+  xlim(c(2, 4)) +
+  theme_void() +
+  scale_fill_manual(values = feat_colors) +
+  theme(legend.position = "none")
+```
+
+
+```{r ext-fig9, fig.width = 12, fig.height = 4, dev = c("png", "pdf")}
+data <- all_features
+l <- (data %>% arrange(-abs(scaled_coefs)))$features
+data$features <- factor(data$features, levels = l)
+data$cat <- factor(data$cat, levels = feat_order)
+legend_fig <- ggplot(data, aes(x = features, y = scaled_coefs, fill = cat)) +
+  geom_col() +
+  theme_classic() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6, face = "bold"),
+        legend.key.size = unit(0.5, "cm")) +
+  scale_fill_manual(values = feat_colors) +
+  guides(fill = guide_legend(title = "Feature type"))
+
+legend <- get_legend(legend_fig)
+
+p <- ggplot(data, aes(x = features, y = scaled_coefs, color = cat)) +
+  geom_segment(aes(x = features, xend = features, y = 0, yend = scaled_coefs)) +
+  geom_point() +
+  theme_classic() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+  ylab("Scaled Coefficients") +
+  xlab("Features in locked model") +
+  theme(legend.position = "none") +
+  labs(color = "Feature Set") +
+  scale_color_manual(values = feat_colors) +
+  coord_cartesian(clip = "off") +
+  theme(plot.margin = margin(4, 2, 1, 1, "cm"))
+
+ggdraw(p) +
+  draw_plot(legend, 0.85, 0.7, .1, .1)
+```

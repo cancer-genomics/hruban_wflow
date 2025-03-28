@@ -1,0 +1,148 @@
+---
+title: Multivariate hazard analyses demonstrate on-treatment ARTEMIS-DELFI scores as independent predictors of overall survival for patients in the PACTO trial
+---
+
+
+Multivariate Cox proportional hazard analyses were generated for each molecular method and fit to overall survival adjusting for clinical subgroups. Each of the indicated subgroups that have been shown to be significant on univariate analyses have been included in the multivariate analysis.  Hazard models are shown using ARTEMIS-DELFI scores at baseline and after one cycle of treatment for patients in the PACTO study.
+
+
+```{r packages, message = FALSE}
+library(here)
+library(readxl)
+library(survival)
+source(here("code/hr_plot_funcs.R"))
+```
+
+
+```{r load_clin_data}
+clin_p <- read_excel(here("data/PACTO_BL_EOT_EOS_PFS_TA_jh.xlsx")) %>%
+  select(subject_id = StudySubjectID,
+         age,
+         #weightloss5_yn is not available
+         arm = INCL_120_E1_C1,
+         #ecog_ps is not available
+         tx_start_date = NABDATE_E2_1_C2,
+         bor = BESTresponse,
+         pfs_date = PFS_date,
+         surv_date = DEATHDATE_E4_C9,
+         surv_status = SURVIVAL_E4_C9,
+         ca199 = CA19_9,
+         crp = CRP,
+         bilirubin = bili,
+         hemoglobin,
+         albumin = Albumin,
+         mgps = mGPS) %>%
+  mutate(arm = ifelse(arm == 9, 1, arm),
+         arm = factor(arm)) # 9 was safety cohort for arm-1
+# arm-1: CT+Nab+Tocili
+# arm-2: CT+Nab
+
+# Fix the date formats
+for (i in colnames(clin_p)) {
+  if (str_detect(i, "[Dd]ate")) {
+    if (!any(class(clin_p[[i]]) == "POSIXt")) {
+      clin_p[[i]] <- as.Date(as.numeric(clin_p[[i]]), origin = "1899-12-30")
+    } else {
+      clin_p[[i]] <- as.Date(clin_p[[i]])
+    }
+  }
+}
+
+# Compute overall and progression-free survival time
+surv_p <- clin_p %>%
+  mutate(pfs = as.numeric(difftime(pfs_date, tx_start_date)),
+         os = as.numeric(difftime(surv_date, tx_start_date))) %>%
+  mutate(death = ifelse(surv_status == 2, 1, 0))
+```
+
+
+```{r load_artemis_delfi}
+artemis_delfi_p <- read_csv(here("data/Test_set_pacto.csv")) %>%
+  select(id, artemis_delfi_score = score, model) %>%
+  filter(model == "ARTEMIS_single_DELFI_SSLs_Ensemble")
+
+# Select baseline and two-week visit timepoints
+blood_draw_p <- read_excel(here("data/PACTO Masterfile.xlsx")) %>%
+  select(cgid = `CGID...3`, date_blood_draw = `Date of draw`,
+         subject_id = PACTO) %>%
+  mutate(date_blood_draw = as.Date(date_blood_draw),
+         patient_id = str_extract(cgid, "^CG[A-Z]{1,5}[0-9]{1,5}"),
+         subject_id = str_pad(subject_id, 3, "left", "0"))
+blood_draw_bl_or_p1_p <- blood_draw_p %>%
+  filter(!str_detect(cgid, "89[4,5]P.*_.*")) %>% # removing duplicate samples
+  filter(!str_detect(cgid, "892")) %>% # removing sample with missing score
+  mutate(visit = str_extract(cgid, "(?<=CG[A-Z]{1,5}[0-9]{1,5}P).*"),
+         visit = sapply(visit, function(x) str_split(x, "_")[[1]][1])) %>%
+  filter(visit == "" | visit == "1")
+blood_draw_bl_and_p1_p <- blood_draw_bl_or_p1_p %>%
+  filter(patient_id %in% pull(filter(count(group_by(blood_draw_bl_or_p1_p,
+                                                    patient_id)),
+                                     n > 1),
+                              patient_id))
+
+# Join the scores with timepoint
+artemis_delfi_blp1_p <- inner_join(artemis_delfi_p, blood_draw_bl_and_p1_p,
+                                   by = join_by(id == cgid)) %>%
+  mutate(visit = ifelse(visit == "", "baseline", "week2"))
+```
+
+
+```{r combine_clin_artemis_delfi}
+surv_artemis_delfi_p <- surv_p %>%
+  inner_join(artemis_delfi_blp1_p) %>%
+  select(subject_id, patient_id, artemis_delfi_score, model,
+         arm, ca199, bilirubin, age, mgps, #ecog_ps, weightloss5_yn,
+         visit,
+         pfs, os, death) %>%
+  pivot_wider(names_from = visit, values_from = artemis_delfi_score) %>%
+  mutate(bilirubin_bin = bilirubin > 25,
+         age_bin = age <= 65,
+         mgps_bin = factor(mgps, levels = c(0, 1, 2)),
+         ca199_bin = ca199 > 37) %>%
+  drop_na()
+```
+
+
+```{r fig9b, fig.width = 12, fig.height = 5, dev = c("png", "pdf")}
+var_labels <- c("Age, years",
+                "> 65",
+                "\u2264 65",
+                #"ECOG\nPerformance Status",
+                #"0",
+                #"1",
+                #"Weight loss, %",
+                #"< 5",
+                #"\u2265 5",
+                "MGPS",
+                "0",
+                "1",
+                "2",
+                "Bilirubin, \u00b5mol/L",
+                "\u2264 25",
+                "> 25",
+                "Treatment",
+                "CT+Nab+Tocili",
+                "CT+Nab",
+                "ARTEMIS DELFI score",
+                "Baseline",
+                "ARTEMIS DELFI score",
+                "Cycle 1")
+
+os_mf_p <- coxph(Surv(os, death) ~ age_bin + #ecog_ps_bin +
+                   #weightloss5_yn_bin +
+                   mgps_bin + bilirubin_bin + arm + baseline + week2,
+                 surv_artemis_delfi_p)
+os_pox_tbl <- get_hr_tbl(surv_artemis_delfi_p, os_mf_p)
+print(plot_hr(os_pox_tbl, var_labels = var_labels))
+```
+
+
+```{r fig9b-pfs, fig.width = 12, fig.height = 5, dev = c("png", "pdf"), eval = FALSE}
+pfs_mf_p <- coxph(Surv(pfs, death) ~ age_bin + #ecog_ps_bin +
+                    #weightloss5_yn_bin +
+                    mgps_bin + bilirubin_bin + arm + baseline + week2,
+                  surv_artemis_delfi_p)
+
+pfs_pox_tbl <- get_hr_tbl(surv_artemis_delfi_p, pfs_mf_p)
+print(plot_hr(pfs_pox_tbl, var_labels = var_labels))
+```

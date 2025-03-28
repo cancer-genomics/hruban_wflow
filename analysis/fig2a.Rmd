@@ -1,0 +1,444 @@
+---
+title: WGMAF approach predicts survival for patients in CheckPAC trial
+---
+
+
+Tree plot showing WGMAF input criteria and response for each patient. The section above the dashed line describes evaluable patients, while the section below the dashed line shows patients who were not evaluable due to unavailable tumor or plasma samples, or an insufficient number of somatic mutations found in tumor. Number of somatic mutations identified in tumors are listed to the left of the tree plot in descending order, colored by mutation type. Baseline MAF is plotted on the left side of tree plot and on-treatment MAF is plotted on the right side. The central spine of the tree plot shows the tumor cellularity using two methods, pathological cellularity evaluated from H&E sample and cellularity assessed from molecular sequencing data, as well as BOR RECIST for each patient.
+
+
+```{r packages, message = FALSE}
+library(tidyverse)
+library(readxl)
+library(here)
+source(here("code/utility_funcs.R"))
+```
+
+
+```{r read in}
+#----------------------------------------------------------------------------------
+# Prepare the data
+#----------------------------------------------------------------------------------
+# Tumor mutations
+tumor_mut<- read_excel(here("data/i07_input.xlsx"),sheet="tumor_filtered_sbs") %>%
+             rowwise() %>%
+             mutate(total = sum(c_across(3:8))) %>%
+             ungroup()
+
+# Plasma mutations
+plasm_mut <- read_excel(here("data/i07_input.xlsx"),sheet="plasma_mafs") %>%
+  drop_na(patient_id)
+plasm_mut$date_blood_draw<-as.Date(plasm_mut$date_blood_draw)
+
+# Pathological cellularity
+path_cell <- read_excel(here("data/i07_input.xlsx"),sheet="cellularity_p", range=c("A1:H38")) %>%
+    rename(patient_id = CGID, cellularity=Path_Cellularity) %>%
+    select(patient_id, cellularity) %>%
+    mutate(cellularity = as.numeric(cellularity)/100)
+
+# Facets cellularity
+fact_cell<- read_excel(here("data/i07_input.xlsx"),sheet="facets_summary") %>%
+    select(patient_id = id, cellularity = purity, emflags) %>%
+    mutate(patient_id = substring(patient_id, 1, 9))
+fact_cell$cellularity<-as.numeric(fact_cell$cellularity)
+
+# Best RECIST response
+best_resp <- read_excel(here("data/i07_input.xlsx"),sheet="CheckPAC_DATA4") %>%
+             select(subject_id = StudySubjectID,
+                    bor = BOR_RECIST) %>%
+             mutate(bor = bor_labels(bor)) %>%
+             inner_join(read_excel(here("data/i07_input.xlsx"), sheet="ID_comparison") %>%
+                    filter(!unlist(lapply(CGID, function(x) any(str_detect(x, c("CGPLPA225", "CGPLPA783", "CGPLPA795")))))) %>%
+                    select(patient_id = CGID, subject_id = StudySubjectID) %>%
+                    mutate(patient_id = substring(patient_id, 1, 9))) %>%
+             mutate(bor = ifelse(bor == "Not evaluable", "NE", bor))
+
+# Baseline and on-treatment blood draw dates
+blot_date <- read_excel(here("data/i07_input.xlsx"),
+                        sheet = "baseline_p2_dates") %>%
+             mutate(tx_start_date = as.Date(tx_start_date),
+                    ct_flwup_date = excel_date(ct_flwup_date),
+                    baseline = excel_date(baseline),
+                    endpoint = excel_date(endpoint))
+```
+
+
+```{r select patients}
+#----------------------------------------------------------------------------------
+# Patient selection for analysis
+#----------------------------------------------------------------------------------
+# (1) Patients with tumor mutations > 50 AND on-treatment blood draws
+anlys_pat <- intersect(pull(filter(tumor_mut, total > 50), patient_id), 
+                       pull(drop_na(blot_date, endpoint), patient_id)) 
+lefto_pat <- setdiff(pull(blot_date, patient_id), anlys_pat)
+
+# (2) Order patients based on on-treatment plasma mutations
+ot_plasm_mut <- plasm_mut %>%
+    select(patient_id, date_blood_draw, mf) %>%
+    inner_join(pivot_longer(select(blot_date, patient_id, baseline, endpoint),
+                            cols = -patient_id,
+                            names_to = "timepoint",
+                            values_to = "date_blood_draw")) %>%
+    filter(timepoint == "endpoint")
+
+order_pmt <- ot_plasm_mut %>%
+             arrange(desc(mf)) %>%
+             pull(patient_id)
+
+# (3) Order left-out patients based on tumor mutations
+order_tmt <- tumor_mut %>%
+             arrange(total) %>%
+             pull(patient_id)
+
+# (4) Add the remaining patients without on-treatment plasma mutations information         
+order_std <- c(setdiff(lefto_pat, union(order_tmt, order_pmt)),
+               intersect(order_tmt[which(!order_tmt %in% order_pmt)], lefto_pat),
+               intersect(order_pmt[which(!order_pmt %in% order_tmt)], lefto_pat),
+               order_pmt)
+
+# (4) Split the order into two groups
+anlys_ord <- unlist(lapply(order_std, function(x) if(x %in% anlys_pat) x))
+lefto_ord <- unlist(lapply(order_std, function(x) if(x %in% lefto_pat) x))
+
+#----------------------------------------------------------------------------------
+# Split the plasma mutations into baseline and on-treatment
+#----------------------------------------------------------------------------------
+plasm_mut_basl <- inner_join(plasm_mut, rename(drop_na(blot_date, baseline), date_blood_draw=baseline))
+plasm_mut_ontr <- inner_join(plasm_mut, rename(drop_na(blot_date, endpoint), date_blood_draw=endpoint))
+
+#----------------------------------------------------------------------------------
+# Split the data into patients analyzed and left out 
+#----------------------------------------------------------------------------------
+## Tumor mutations
+tumor_mut_all1 <- left_join(tibble(patient_id = anlys_ord), tumor_mut)
+tumor_mut_all2 <- left_join(tibble(patient_id = lefto_ord), tumor_mut)
+
+## Plasma mutations
+### Baseline
+plasm_mut_bsl1 <- left_join(tibble(patient_id = anlys_ord), plasm_mut_basl)
+plasm_mut_bsl2 <- left_join(tibble(patient_id = lefto_ord), plasm_mut_basl)
+
+### On-treatment
+plasm_mut_ont1 <- left_join(tibble(patient_id = anlys_ord), plasm_mut_ontr)
+plasm_mut_ont2 <- left_join(tibble(patient_id = lefto_ord), plasm_mut_ontr)
+
+## Cellularity
+bins <- seq(0,1,0.2); bins[length(bins)] <- bins[length(bins)]+1e-6
+# In pathological cellularity, NA means missing
+path_cell_binn <- mutate(path_cell,
+                         cell_binn = cut(cellularity, breaks=bins, include.lowest=TRUE)) 
+# In facets cellularity, if emflags show no confidence, NA => [0,0.2),
+# but emflags = NA and NA cellularity => NA cellularity
+fact_cell_binn <- mutate(fact_cell,
+                         cellularity = ifelse(is.na(cellularity)&!is.na(emflags), 0.1, cellularity),
+                         cell_binn = cut(cellularity, breaks=bins, include.lowest=TRUE))
+path_cell_all1 <- left_join(tibble(patient_id = anlys_ord), path_cell_binn)
+path_cell_all2 <- left_join(tibble(patient_id = lefto_ord), path_cell_binn)
+fact_cell_all1 <- left_join(tibble(patient_id = anlys_ord), fact_cell_binn)
+fact_cell_all2 <- left_join(tibble(patient_id = lefto_ord), fact_cell_binn)
+ 
+## Best response
+best_resp_all1 <- left_join(tibble(patient_id = anlys_ord), best_resp)
+best_resp_all2 <- left_join(tibble(patient_id = lefto_ord), best_resp)
+```
+
+
+```{r fig2a, fig.width = 10, fig.height = 7, dev = c("png", "pdf")}
+#----------------------------------------------------------------------------------
+# Plotting presets
+#----------------------------------------------------------------------------------
+## Panel widths
+w1 <- 25; w2 <- 17; w3 <- 2; w4 <- 2; w5 <- 2; w6 <- 17
+
+## Panel heights
+h1 <- 20-1    # analyzed samples
+h2 <- 20-1    # left out samples
+r12 <- h2/h1
+
+## Panel margins
+tp <- 5     # top margin
+bt <- 1     # bottom margin
+
+## Y-axis extension
+yex <- 0.75
+
+## Fix the layout
+lay.mat <- layout.matrix(c(h1,h2), c(w1,w2,w3,w4,w5,w6))
+layout(lay.mat)
+par(oma=c(0,0,0,0)) # Thin outer margins
+
+# Text size
+xaxis.cex <- 0.7
+xaxis.spine.cex <- 0.6 
+
+## Fix the color scheme
+## Tumor mutations
+tumor_mut_col <- scales::hue_pal()(8-3+1) 
+
+## Cellularity
+cell_palette <- colorRampPalette(c("white","blue"))(5)
+names(cell_palette) <- c("<20", "20-40", "40-60", "60-80", "80-100")
+path_cell_col1 <- cell_palette[path_cell_all1$cell_binn] 
+path_cell_col1[is.na(path_cell_col1)] <- "#000000"
+path_cell_col2 <- cell_palette[path_cell_all2$cell_binn] 
+path_cell_col2[is.na(path_cell_col2)] <- "#000000"
+fact_cell_col1 <- cell_palette[fact_cell_all1$cell_binn] 
+fact_cell_col1[is.na(fact_cell_col1)] <- "#000000"
+fact_cell_col2 <- cell_palette[fact_cell_all2$cell_binn] 
+fact_cell_col2[is.na(fact_cell_col2)] <- "#000000"
+
+## Best response
+resp_palette <- c("green", "darkgoldenrod1", "red", "grey") 
+names(resp_palette) <- c("PR", "SD", "PD", "NE")
+best_resp_col1 <- resp_palette[best_resp_all1$bor]
+best_resp_col2 <- resp_palette[best_resp_all2$bor]
+
+#----------------------------------------------------------------------------------
+# Mutations plot
+#----------------------------------------------------------------------------------
+tm1plot <- t(as.matrix(tumor_mut_all1[,3:8]))
+tm2plot <- t(as.matrix(tumor_mut_all2[,3:8]))
+breaks <- pretty(colSums(cbind(tm1plot, tm2plot)))
+
+## ANALYZED panel
+par(mar=c(bt,4,tp,1))
+# Make the horizontal bars for tumor mutations
+ytick1 <- barplot(-tm1plot, horiz=TRUE, axes=FALSE, width=0.8, space=0.25,
+                  #ylim=c(0.6, ncol(tm1plot)-0.4),
+                  ylim=c(0.6-yex, ncol(tm1plot)-0.4+yex),
+                  xlim=sort(-range(breaks)),
+                  col=tumor_mut_col, border=NA,
+                  yaxs="i")
+
+# Annotate total number of mutations
+text(-tumor_mut_all1$total-500, ytick1, tumor_mut_all1$total, adj=1, xpd=TRUE, cex=1)
+
+# Adding x-axis at the top
+axis(3, at=-breaks, labels=paste0(breaks/1000, c("", rep("k", length(breaks)-1))), 
+     lwd=1, font=1)
+mtext("Number of tumor somatic mutations", 3, cex=xaxis.cex, line=2.5)
+
+# Adding y-axis on the right
+axis(4, at=ytick1, labels=anlys_ord, line=-0.5, las=2, lwd=0, font=1)
+
+#----------------------------------------------------------------------------------
+# Adding floating legend for tumor mutations
+#----------------------------------------------------------------------------------
+add.legend(title="Mutation type", x=-45e3, y=15, xadj=1e3, labels=rownames(tm1plot))
+
+#----------------------------------------------------------------------------------
+# Adding floating legend for cellularity 
+#----------------------------------------------------------------------------------
+add.legend(title="Cellularity", x=-45e3, y=6, xadj=1e3,
+           labels=c(rev(names(cell_palette)),"NA"), col_palette=c(rev(cell_palette),"#000000"), border="grey")
+
+#----------------------------------------------------------------------------------
+
+## LEFT OUT panel
+par(mar=c(r12*bt,4,r12*tp,1))
+# Make the horizontal bars for tumor mutations
+ytick2 <- barplot(-tm2plot, horiz=TRUE, axes=FALSE, width=0.8, space=0.25,
+                  #ylim=c(0.6, ncol(tm2plot)-0.4),
+                  ylim=c(0.6-r12*yex, ncol(tm2plot)-0.4+r12*yex),
+                  xlim=sort(-range(breaks)),
+                  col=tumor_mut_col, border=NA,
+                  yaxs="i")
+
+# Annotate total number of mutations
+text(-tumor_mut_all2$total-500, ytick1, tumor_mut_all2$total, adj=1, xpd=TRUE, cex=1)
+
+# Adding x-axis at the top
+#axis(3, at=-breaks, labels=paste0(breaks/1000, c("", rep("k", length(breaks)-1))), 
+#     lwd=1, font=1)
+#mtext("Number of tumor somatic mutations", 3, cex=xaxis.cex, line=2.5)
+
+# Adding y-axis on the right
+axis(4, at=ytick2, labels=lefto_ord, line=-0.5, las=2, lwd=0, font=1)
+
+#----------------------------------------------------------------------------------
+# Adding floating legend for BOR 
+#----------------------------------------------------------------------------------
+add.legend(title="BOR RECIST", x=-45e3, y=15, xadj=1e3, 
+           labels=names(resp_palette), col_palette=resp_palette, border="grey")
+
+
+#----------------------------------------------------------------------------------
+# Baseline MAF
+#----------------------------------------------------------------------------------
+breaks <- pretty(c(plasm_mut_basl$mf, plasm_mut_ontr$mf))
+
+## ANALYZED panel
+par(mar=c(bt,4,tp,0))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = -plasm_mut_bsl1$mf, y = c(1:nrow(plasm_mut_bsl1)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = sort(-range(breaks)), cex=2,
+     ylim = c(1-yex, nrow(plasm_mut_bsl1)+yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(plasm_mut_bsl1), function(i) {
+     lines(c(-plasm_mut_bsl1$mf[c(1:nrow(plasm_mut_bsl1)) == i], 0), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=-plasm_mut_bsl1$mf, y=1:nrow(plasm_mut_bsl1), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+# Draw x-axis at the top
+axis(3, at=-breaks, labels=breaks*100, lwd=1, font=1)
+mtext("Baseline MAF (%)", 3, cex=xaxis.cex, line=2.5)
+
+## LEFT OUT panel
+par(mar=c(r12*bt,4,r12*tp,0))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = plasm_mut_bsl2$mf, y = c(1:nrow(plasm_mut_bsl2)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = sort(-range(breaks)), cex=2,
+     ylim = c(1-r12*yex, nrow(plasm_mut_bsl2)+r12*yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(plasm_mut_bsl2), function(i) {
+     lines(c(-plasm_mut_bsl2$mf[c(1:nrow(plasm_mut_bsl2)) == i], 0), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=-plasm_mut_bsl2$mf, y=1:nrow(plasm_mut_bsl2), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+# Draw x-axis at the top
+#axis(3, at=-breaks, labels=breaks*100, lwd=1, font=1)
+#mtext("Baseline MAF (%)", 3, cex=xaxis.cex, line=2.5)
+
+#----------------------------------------------------------------------------------
+# Cellularity plot
+#----------------------------------------------------------------------------------
+# Pathology
+## ANALYZED panel
+par(mar=c(bt,0,tp,0))
+plot(x=rep(0, nrow(path_cell_all1)), y=1:nrow(path_cell_all1),
+     pch=22, col="grey", bg=path_cell_col1,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-yex, nrow(path_cell_all1)+yex),
+     yaxs="i")
+mtext("Pathalogical\ncellularity", 3, las=2, cex=xaxis.spine.cex)
+
+## LEFT OUT panel 
+par(mar=c(r12*bt,0,r12*tp,0))
+plot(x=rep(0, nrow(path_cell_all2)), y=1:nrow(path_cell_all2),
+     pch=22, col="grey", bg=path_cell_col2,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-r12*yex, nrow(path_cell_all2)+r12*yex),
+     yaxs="i")
+#mtext("Pathalogical\ncellularity", 3, las=2, cex=xaxis.spine.cex)
+
+# Facets
+## ANALYZED panel
+par(mar=c(bt,0,tp,0))
+plot(x=rep(0, nrow(fact_cell_all1)), y=1:nrow(fact_cell_all1),
+     pch=22, col="grey", bg=fact_cell_col1,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-yex, nrow(fact_cell_all1)+yex),
+     yaxs="i")
+mtext("WGS\ncellularity", 3, las=2, cex=xaxis.spine.cex)
+
+## LEFT OUT panel 
+par(mar=c(r12*bt,0,r12*tp,0))
+plot(x=rep(0, nrow(fact_cell_all2)), y=1:nrow(fact_cell_all2),
+     pch=22, col="grey", bg=fact_cell_col2,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-r12*yex, nrow(fact_cell_all2)+r12*yex),
+     yaxs="i")
+#mtext("WGS\ncellularity", 3, las=2, cex=xaxis.spine.cex)
+
+#----------------------------------------------------------------------------------
+# Best RECIST response
+#----------------------------------------------------------------------------------
+## ANALYZED panel
+par(mar=c(bt,0,tp,0))
+plot(x=rep(0, nrow(best_resp_all1)), y=1:nrow(best_resp_all1),
+     pch=22, col="grey", bg=best_resp_col1,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-yex, nrow(best_resp_all1)+yex),
+     yaxs="i")
+mtext("BOR\nRECIST", 3, las=2, cex=xaxis.spine.cex)
+
+## LEFT OUT panel 
+par(mar=c(r12*bt,0,r12*tp,0))
+plot(x=rep(0, nrow(best_resp_all2)), y=1:nrow(best_resp_all2),
+     pch=22, col="grey", bg=best_resp_col2,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-r12*yex, nrow(best_resp_all2)+r12*yex),
+     yaxs="i")
+#mtext("BOR\nRECIST", 3, las=2, cex=xaxis.spine.cex)
+
+#----------------------------------------------------------------------------------
+# On-treatment MAF
+#----------------------------------------------------------------------------------
+breaks <- pretty(c(plasm_mut_basl$mf, plasm_mut_ontr$mf))
+
+## ANALYZED panel
+par(mar=c(bt,0,tp,4))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = plasm_mut_ont1$mf, y = c(1:nrow(plasm_mut_ont1)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = range(breaks), cex=2,
+     ylim = c(1-yex, nrow(plasm_mut_ont1)+yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(plasm_mut_ont1), function(i) {
+     lines(c(0,plasm_mut_ont1$mf[c(1:nrow(plasm_mut_ont1)) == i]), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=plasm_mut_ont1$mf, y=1:nrow(plasm_mut_ont1), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+# Draw x-axis at the top
+axis(3, at=breaks, labels=breaks*100, lwd=1, font=1)
+mtext("On-treatment MAF (%)", 3, cex=xaxis.cex, line=2.5)
+
+## LEFT OUT panel
+par(mar=c(r12*bt,0,r12*tp,4))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = plasm_mut_ont2$mf, y = c(1:nrow(plasm_mut_ont2)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = range(breaks), cex=2,
+     ylim = c(1-r12*yex, nrow(plasm_mut_ont2)+r12*yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(plasm_mut_ont2), function(i) {
+     lines(c(0,plasm_mut_ont2$mf[c(1:nrow(plasm_mut_ont2)) == i]), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=plasm_mut_ont2$mf, y=1:nrow(plasm_mut_ont2), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+# Draw x-axis at the top
+#axis(3, at=breaks, labels=breaks*100, lwd=1, font=1)
+#mtext("On-treatment MAF (%)", 3, cex=xaxis.cex, line=2.5)
+
+#----------------------------------------------------------------------------------
+# Annotations
+#----------------------------------------------------------------------------------
+par(fig=c(0,1,0,1), mar=c(0,1,0,1), new=TRUE)
+
+# Samples that are not evaluable
+#plot(c(-10,10), 12.10*c(1,1), lty=3, bty="n", ylim=c(0,25), type="l", axes=FALSE, xpd=TRUE)
+#text(1,11.60, "Not evaluable \n(Below analytic threshold)", adj=0.5)
+
+# Samples that were dropped from the analysis, because of missing data
+plot(c(-10,10), 12.10*c(1,1), lty=0, bty="n", ylim=c(0,25), type="l", axes=FALSE, xpd=TRUE)
+text(0, 12, "Not evaluable \n(Missing tumor sample or blood draw or\nbelow analytic threshold)", adj=0.5)
+draw.bracket(0, 11, -10, 10)
+
+# To explain why the MAF is high for low mutation count
+smpl_plasm_mut <- filter(plasm_mut_ont2, patient_id == "CGPLPA779")
+n_ref <- smpl_plasm_mut$n_ref
+n_alt <- smpl_plasm_mut$n_alt
+text(8.85,6.60,paste(n_alt,n_alt+n_ref,sep="/"))
+#----------------------------------------------------------------------------------
+```

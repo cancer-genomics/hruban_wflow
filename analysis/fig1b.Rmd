@@ -1,0 +1,363 @@
+---
+title: Overview of study design and samples
+---
+
+
+Description of CheckPAC and PACTO patients at baseline. Categories show the location of tumor, the number of metastatic sites, the time between initial diagnosis and trial enrollment, prior surgery, smoking status, sex, method of assessment of progression, trial arm, and cancer stage. 
+
+
+```{r packages, message = FALSE}
+library(VplotR)
+library(forcats)
+library(grid)
+library(here)
+library(readxl)
+library(scales)
+library(tidyverse)
+```
+
+
+```{r pacto}
+df2<-read_excel(here("data/for_leal_plot_042324.xlsx"), sheet = "for_leal_plot_pacto")
+df2$Subfeature
+#calculate value for number of subfeatures within each feature
+tt <- with(df2[!duplicated(df2$Subfeature), ], table(Group))
+#set color palette for each feature based on the number of subfeatures
+green <- brewer_pal(pal = "Greens")(tt[names(tt) == "Stage"])
+blue <- brewer_pal(pal = "Blues")(tt[names(tt) == "Arm"])
+red <- brewer_pal(pal = "Reds")(tt[names(tt) == "Age"])
+orange <- brewer_pal(pal = "Oranges")(tt[names(tt) == "Progression"])
+purple <- brewer_pal(pal = "Purples")(tt[names(tt) == "Sex"])
+purd <- brewer_pal(pal = "PuRd")(tt[names(tt) == "Smoking"])
+bupu <- brewer_pal(pal = "BuPu")(tt[names(tt) == "Surgery"])
+rdpu <- brewer_pal(pal = "RdPu")(tt[names(tt) == "Time"])
+orrd <- brewer_pal(pal = "OrRd")(tt[names(tt) == "Sites"])
+ylgn <- brewer_pal(pal = "YlGn")(tt[names(tt) == "Location"])
+#create data frame of subfeatures with corresponding color filled in 
+Subfeature_df <- df2[!duplicated(df2$Subfeature), c("Subfeature", "Group")]
+Subfeature_df$Group <- factor(Subfeature_df$Group, levels = c("Stage", "Arm", "Age", "Progression", "Sex", "Smoking", "Surgery", "Time", "Sites", "Location"))
+Subfeature_df <- arrange(Subfeature_df, Group, Subfeature)
+Subfeature_df$fill <- c(green, blue, red, orange, purple, purd, bupu, rdpu, orrd, ylgn)
+Subfeature_df$Subfeature <- factor(Subfeature_df$Subfeature, levels = Subfeature_df$Subfeature)
+df2$Subfeature <- factor(df2$Subfeature, levels = Subfeature_df$Subfeature)
+levels(df2$Feature) <- gsub(" ", "\n", levels(df2$Feature))
+#generate plot based on df2
+g1 <- ggplot(data = df2, aes(x = as.factor(Feature),
+                             y = Patients,
+                             fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  labs(x = "", y = "Patients") +
+  scale_fill_manual(values = Subfeature_df$fill, name = "Clinical Feature") +
+  scale_x_discrete(limits = c("Stage", "Arm", "Age", "Progression", "Sex", "Smoking", "Surgery", "Time", "Sites", "Location")) +
+  theme_void() +
+  scale_y_continuous(trans = "reverse", position = "right", labels = scales::percent) +
+  theme(axis.text.x = element_text(colour = "black", size = 12)) +
+  theme(axis.text.y = element_blank()) +
+  theme(axis.title.y = element_blank()) +
+  theme(axis.title.x = element_blank()) +
+  coord_flip(ylim = c(0,1)) +
+  theme(legend.position = "bottom")
+# second format of same kind of figure with key, this time plotting as "arm"
+stage <- ggplot(data = df2[df2$Group == "Stage", ],
+              aes(x = as.factor(Feature),
+                  y = Patients,
+                  fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = green, name = "Stage" )
+tmp <- ggplot_gtable(ggplot_build(stage))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_stage <- tmp$grobs[[leg]]
+
+arm <- ggplot(data = df2[df2$Group == "Arm", ],
+              aes(x = as.factor(Feature),
+                  y = Patients,
+                  fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = blue, name = "Trial Arm" )
+tmp <- ggplot_gtable(ggplot_build(arm))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_arm <- tmp$grobs[[leg]]
+
+age <- ggplot(data = df2[df2$Group == "Age", ],
+              aes(x = as.factor(Feature),
+                  y = Patients,
+                  fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = red, name = "Age" )
+tmp <- ggplot_gtable(ggplot_build(age))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_age <- tmp$grobs[[leg]]
+
+progression <- ggplot(data = df2[df2$Group == "Progression", ],
+                  aes(x = as.factor(Feature),
+                      y = Patients,
+                      fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = orange, name = "Method of progression" )
+tmp <- ggplot_gtable(ggplot_build(progression))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_progression <- tmp$grobs[[leg]]
+
+sex <- ggplot(data = df2[df2$Group == "Sex", ],
+                      aes(x = as.factor(Feature),
+                          y = Patients,
+                          fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = purple, name = "Sex" )
+tmp <- ggplot_gtable(ggplot_build(sex))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_sex <- tmp$grobs[[leg]]
+
+smoking <- ggplot(data = df2[df2$Group == "Smoking", ],
+                  aes(x = as.factor(Feature),
+                      y = Patients,
+                      fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = purd, name = "Smoking status" )
+tmp <- ggplot_gtable(ggplot_build(smoking))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_smoking <- tmp$grobs[[leg]]
+
+surgery <- ggplot(data = df2[df2$Group == "Surgery", ],
+               aes(x = as.factor(Feature),
+                   y = Patients,
+                   fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = bupu, name = "Prior surgery" )
+tmp <- ggplot_gtable(ggplot_build(surgery))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_surgery <- tmp$grobs[[leg]]
+
+time <- ggplot(data = df2[df2$Group == "Time", ],
+               aes(x = as.factor(Feature),
+                   y = Patients,
+                   fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = rdpu, name = "Time since first PDAC diagnosis" )
+tmp <- ggplot_gtable(ggplot_build(time))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_time <- tmp$grobs[[leg]]
+
+sites <- ggplot(data = df2[df2$Group == "Sites", ],
+               aes(x = as.factor(Feature),
+                   y = Patients,
+                   fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = orrd, name = "Number of metastatic sites" )
+tmp <- ggplot_gtable(ggplot_build(sites))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_sites <- tmp$grobs[[leg]]
+
+location <- ggplot(data = df2[df2$Group == "Location", ],
+               aes(x = as.factor(Feature),
+                   y = Patients,
+                   fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = ylgn, name = "Location" )
+tmp <- ggplot_gtable(ggplot_build(location))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_location <- tmp$grobs[[leg]]
+```
+
+
+```{r checkpac}
+# Checkpac plots
+#load in data frame to be used
+df2_c<-read_excel(here("data/for_leal_plot_042324.xlsx"), sheet = "for_leal_plot_checkpac")
+df2_c$Subfeature
+#calculate value for number of subfeatures within each feature
+tt <- with(df2_c[!duplicated(df2_c$Subfeature), ], table(Group))
+#set color palette for each feature based on the number of subfeatures
+green <- brewer_pal(pal = "Greens")(tt[names(tt) == "Stage"])
+blue <- brewer_pal(pal = "Blues")(tt[names(tt) == "Arm"])
+red <- brewer_pal(pal = "Reds")(tt[names(tt) == "Age"])
+orange <- brewer_pal(pal = "Oranges")(tt[names(tt) == "Progression"])
+purple <- brewer_pal(pal = "Purples")(tt[names(tt) == "Sex"])
+purd <- brewer_pal(pal = "PuRd")(tt[names(tt) == "Smoking"])
+bupu <- brewer_pal(pal = "BuPu")(tt[names(tt) == "Surgery"])
+rdpu <- brewer_pal(pal = "RdPu")(tt[names(tt) == "Time"])
+orrd <- brewer_pal(pal = "OrRd")(tt[names(tt) == "Sites"])
+ylgn <- brewer_pal(pal = "YlGn")(tt[names(tt) == "Location"])
+#create data frame of subfeatures with corresponding color filled in 
+Subfeature_df_c <- df2_c[!duplicated(df2_c$Subfeature), c("Subfeature", "Group")]
+Subfeature_df_c$Group <- factor(Subfeature_df_c$Group, levels = c("Stage", "Arm", "Age", "Progression", "Sex", "Smoking", "Surgery", "Time", "Sites", "Location"))
+Subfeature_df_c <- arrange(Subfeature_df_c, Group, Subfeature)
+Subfeature_df_c$fill <- c(green, blue, red, orange, purple, purd, bupu, rdpu, orrd, ylgn)
+Subfeature_df_c$Subfeature <- factor(Subfeature_df_c$Subfeature, levels = Subfeature_df_c$Subfeature)
+df2_c$Subfeature <- factor(df2_c$Subfeature, levels = Subfeature_df_c$Subfeature)
+levels(df2_c$Feature) <- gsub(" ", "\n", levels(df2_c$Feature))
+#generate plot based on df2_c
+g1_c <- ggplot(data = df2_c, aes(x = as.factor(Feature),
+                             y = Patients,
+                             fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  labs(x = "", y = "Patients") +
+  scale_fill_manual(values = Subfeature_df$fill, name = "Clinical Feature") +
+  scale_x_discrete(limits = c("Stage", "Arm", "Age", "Progression", "Sex", "Smoking", "Surgery", "Time", "Sites", "Location")) +
+  theme_void() +
+  scale_y_continuous(trans = "reverse", position = "right", labels = scales::percent) +
+  theme(axis.text.x = element_blank()) +
+  theme(axis.text.y = element_text(colour = "black", size = 12)) +
+  theme(axis.title.y = element_blank()) +
+  theme(axis.title.x = element_blank()) +
+  coord_flip(ylim = c(0,1)) +
+  theme(legend.position = "bottom")
+
+# second format of same kind of figure with key, this time plotting as "arm"
+stage_c <- ggplot(data = df2_c[df2_c$Group == "Stage", ],
+                aes(x = as.factor(Feature),
+                    y = Patients,
+                    fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = green, name = "Stage" )
+tmp <- ggplot_gtable(ggplot_build(stage))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_stage <- tmp$grobs[[leg]]
+
+arm_c <- ggplot(data = df2_c[df2_c$Group == "Arm", ],
+              aes(x = as.factor(Feature),
+                  y = Patients,
+                  fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = blue, name = "Trial Arm" )
+tmp <- ggplot_gtable(ggplot_build(arm))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_arm <- tmp$grobs[[leg]]
+
+age_c <- ggplot(data = df2_c[df2_c$Group == "Age", ],
+              aes(x = as.factor(Feature),
+                  y = Patients,
+                  fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = red, name = "Age" )
+tmp <- ggplot_gtable(ggplot_build(age))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_age <- tmp$grobs[[leg]]
+
+progression_c <- ggplot(data = df2_c[df2_c$Group == "Progression", ],
+                      aes(x = as.factor(Feature),
+                          y = Patients,
+                          fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = orange, name = "Method of progression" )
+tmp <- ggplot_gtable(ggplot_build(progression))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_progression <- tmp$grobs[[leg]]
+
+sex_c <- ggplot(data = df2_c[df2_c$Group == "Sex", ],
+              aes(x = as.factor(Feature),
+                  y = Patients,
+                  fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = purple, name = "Sex" )
+tmp <- ggplot_gtable(ggplot_build(sex))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_sex <- tmp$grobs[[leg]]
+
+smoking_c <- ggplot(data = df2_c[df2_c$Group == "Smoking", ],
+                  aes(x = as.factor(Feature),
+                      y = Patients,
+                      fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = purd, name = "Smoking status" )
+tmp <- ggplot_gtable(ggplot_build(smoking))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_smoking <- tmp$grobs[[leg]]
+
+
+surgery_c <- ggplot(data = df2_c[df2_c$Group == "Surgery", ],
+                  aes(x = as.factor(Feature),
+                      y = Patients,
+                      fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = bupu, name = "Prior surgery" )
+tmp <- ggplot_gtable(ggplot_build(surgery))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_surgery <- tmp$grobs[[leg]]
+
+
+time_c<- ggplot(data = df2_c[df2_c$Group == "Time", ],
+               aes(x = as.factor(Feature),
+                   y = Patients,
+                   fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") + theme(text = element_text(size = 20)) +
+  scale_fill_manual(values = rdpu, name = "Time since first PDAC diagnosis" )
+tmp <- ggplot_gtable(ggplot_build(time))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_time <- tmp$grobs[[leg]]
+
+sites_c <- ggplot(data = df2_c[df2_c$Group == "Sites", ],
+                aes(x = as.factor(Feature),
+                    y = Patients,
+                    fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = orrd, name = "Number of metastatic sites" )
+tmp <- ggplot_gtable(ggplot_build(sites))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_sites <- tmp$grobs[[leg]]
+
+location_c <- ggplot(data = df2_c[df2_c$Group == "Location", ],
+                   aes(x = as.factor(Feature),
+                       y = Patients,
+                       fill = Subfeature)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = ylgn, name = "Location" )
+tmp <- ggplot_gtable(ggplot_build(location))
+leg <- which(sapply(tmp$grobs, function(x) x$name) ==  "guide-box")
+legend_location <- tmp$grobs[[leg]]
+```
+
+
+```{r fig1b, fig.width = 16, fig.height = 7, dev = c("png", "pdf")}
+#generate viewport locations for each of the legend boxes
+vp_legend_location  <- viewport(x = 0.1, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_sites <- viewport(x = 0.22, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_time  <- viewport(x = 0.36, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_surgery  <- viewport(x = 0.46, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_smoking <- viewport(x = 0.54, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_sex<- viewport(x = 0.62, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_progression<- viewport(x = 0.7, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_age<- viewport(x = 0.78, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_arm<- viewport(x = 0.88, y = 1.5, width = 2, height = 2, just = "top")
+vp_legend_stage<- viewport(x = 0.95, y = 1.5, width = 2, height = 2, just = "top")
+vp_plot_a<-viewport(x=.27, y=.6, width=.52, height=.7)
+vp_plot_b<-viewport(x=.75, y=.6, width=.48, height=.7)
+grid.newpage()
+
+# generate pdf version of plot by adding in viewports to g1_c
+pushViewport(viewport(x = 0.5, y = 0.6, width = 1, height = 0.7))
+print(g1_c + theme(legend.position = "none"), vp = vp_plot_a)
+print(g1 + theme(legend.position = "none"), vp = vp_plot_b)
+upViewport(1)
+pushViewport(viewport(y=0.23, width=1, height=0.35, name="B"))
+grid.rect(gp=gpar(col="white"))
+pushViewport(vp_legend_stage)
+grid.draw(legend_stage)
+upViewport(1)
+pushViewport(vp_legend_arm)
+grid.draw(legend_arm)
+upViewport(1)
+pushViewport(vp_legend_age)
+grid.draw(legend_age)
+upViewport(1)
+pushViewport(vp_legend_progression)
+grid.draw(legend_progression)
+upViewport(1)
+pushViewport(vp_legend_sex)
+grid.draw(legend_sex)
+upViewport(1)
+pushViewport(vp_legend_smoking)
+grid.draw(legend_smoking)
+upViewport(1)
+pushViewport(vp_legend_surgery)
+grid.draw(legend_surgery)
+upViewport(1)
+pushViewport(vp_legend_time)
+grid.draw(legend_time)
+upViewport(1)
+pushViewport(vp_legend_sites)
+grid.draw(legend_sites)
+upViewport(1)
+pushViewport(vp_legend_location)
+grid.draw(legend_location)
+```

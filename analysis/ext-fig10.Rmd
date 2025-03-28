@@ -1,0 +1,314 @@
+---
+title: ARTEMIS-DELFI scores on-treatment and best overall response in CheckPAC trial
+---
+
+
+Patients are listed along vertical axis, separated into those that are evaluable by ARTEMIS-DELFI method at the follow up timepoint. Baseline ARTEMIS-DELFI score is plotted on the left side of the plot, with follow-up ARTEMIS-DELFI score on the right side of the plot. BOR RECIST 1.1 is shown, separated by color, in central panel.
+
+
+```{r packages, message = FALSE}
+library(tidyverse)
+library(readxl)
+library(here)
+source(here("code/utility_funcs.R"))
+```
+
+
+```{r data}
+
+#----------------------------------------------------------------------------------
+# Prepare the data
+#----------------------------------------------------------------------------------
+# Delfi scores
+delfi_scr <- read_csv(here("data/artemis.csv")) %>% 
+    left_join(read_excel(here("data/checkpac_plasma_manifest.xlsx"), col_type=c("text", "text", "text")) %>% 
+    select(cgid = `Sample ID*`, patient_id = Patient, date_blood_draw = Date),
+    by = join_by(id == cgid)) %>%
+    select(patient_id, date_blood_draw, ARTEMIS_single_DELFI_SSLs_Ensemble) %>%
+    drop_na() %>%
+    mutate(date_blood_draw = as.Date(as.numeric(date_blood_draw), origin="1899-12-30"))
+
+
+# Best RECIST response
+best_resp <- read_excel(here("data/CheckPAC_clinical_annotated011622.xlsx")) %>%
+             select(subject_id = StudySubjectID,
+                    bor = `Best overall confirmed response (RECIST)`) %>%
+             inner_join(read_excel(here("data/ID_comparison.xlsx")) %>%
+                    filter(!unlist(lapply(CGID, function(x) any(str_detect(x, c("CGPLPA225", "CGPLPA783", "CGPLPA795")))))) %>%
+                    select(patient_id = CGID, subject_id = StudySubjectID) %>%
+                    mutate(patient_id = substring(patient_id, 1, 9))) %>%
+             mutate(bor = ifelse(bor == "Not evaluable", "NE", bor)) 
+
+# Baseline and on-treatment blood draw dates
+#blot_date <- read_csv(here("data/checkpac_baseline_endpoint_dates.csv"))
+blot_date <- read_csv(here("data/checkpac_baseline_p2_dates.csv")) %>%
+    mutate(tx_start_date = as.Date(tx_start_date, "%m/%d/%y"),
+           ct_flwup_date = as.Date(ct_flwup_date, "%m/%d/%y"),
+           baseline = as.Date(baseline, "%m/%d/%y"),
+           endpoint = as.Date(endpoint, "%m/%d/%y"),
+           `week 2` = as.Date(`week 2`, "%m/%d/%y"))
+```
+
+
+```{r inclusion}
+
+#----------------------------------------------------------------------------------
+# Patient selection for analysis
+#----------------------------------------------------------------------------------
+# (1) Patients with on-treatment Delfi score are kept in the analysis
+anlys_pat <- pull(drop_na(blot_date, endpoint), patient_id)
+lefto_pat <- setdiff(pull(blot_date, patient_id), anlys_pat)
+
+# (2) Order patients based on baseline Delfi scores and on-treatment if baseline is NA 
+order_bas <- delfi_scr %>%
+             inner_join(blot_date %>% 
+             select(patient_id, date_blood_draw=baseline) %>%
+             drop_na()) %>%
+             arrange(ARTEMIS_single_DELFI_SSLs_Ensemble) %>%
+             pull(patient_id)
+order_ont <- delfi_scr %>%
+             inner_join(blot_date %>% 
+             select(patient_id, date_blood_draw=endpoint) %>%
+             drop_na()) %>%
+             arrange(desc(ARTEMIS_single_DELFI_SSLs_Ensemble)) %>%
+             pull(patient_id)
+
+# (3) Add the remaining patients without tumor mutations information         
+order_std <- c(setdiff(lefto_pat, order_ont),   # patients without baseline or on-treatment score
+               intersect(order_ont, lefto_pat), # patients with baseline, but no on-treatment score
+               intersect(order_bas, setdiff(anlys_pat, order_ont)), # patients with no baseline, but on-treatment score
+               intersect(order_ont, anlys_pat)) # patients with both baseline and on-treatment score
+
+# (4) Split the order into two groups
+anlys_ord <- unlist(lapply(order_std, function(x) if(x %in% anlys_pat) x))
+lefto_ord <- unlist(lapply(order_std, function(x) if(x %in% lefto_pat) x))
+
+#----------------------------------------------------------------------------------
+# Split the delfi score into baseline and on-treatment
+#----------------------------------------------------------------------------------
+delfi_scr_basl <- inner_join(delfi_scr, rename(drop_na(blot_date, baseline), date_blood_draw=baseline))
+delfi_scr_ontr <- inner_join(delfi_scr, rename(drop_na(blot_date, endpoint), date_blood_draw=endpoint))
+
+#----------------------------------------------------------------------------------
+# Split the data into patients analyzed and left out 
+#----------------------------------------------------------------------------------
+## Delfi score 
+### Baseline
+delfi_scr_bsl1 <- left_join(tibble(patient_id = anlys_ord), delfi_scr_basl)
+delfi_scr_bsl2 <- left_join(tibble(patient_id = lefto_ord), delfi_scr_basl)
+
+### On-treatment
+delfi_scr_ont1 <- left_join(tibble(patient_id = anlys_ord), delfi_scr_ontr)
+delfi_scr_ont2 <- left_join(tibble(patient_id = lefto_ord), delfi_scr_ontr)
+
+## Cellularity
+bins <- seq(0,1,0.2); bins[length(bins)] <- bins[length(bins)]+1e-6
+
+## Best response
+best_resp_all1 <- left_join(tibble(patient_id = anlys_ord), best_resp)
+best_resp_all2 <- left_join(tibble(patient_id = lefto_ord), best_resp)
+```
+
+```{r ext-fig10, fig.width = 7, fig.height = 7, dev = c("png", "pdf")}
+
+#----------------------------------------------------------------------------------
+# Plotting presets
+#----------------------------------------------------------------------------------
+## Panel widths
+w1 <- 3; w2 <- 17; w5 <- 2; w6 <- 17
+
+## Panel heights
+h1 <- 33-1    # analyzed samples
+#h2 <- 7-1   # left out samples
+h2 <- 7.5
+
+## Panel margins
+tp <- 5     # top margin
+bt <- 2     # bottom margin
+r12 <- 1/3 #h2/h1
+
+## Y-axis extension
+yex <- 2
+
+## Fix the layout
+lay.mat <- layout.matrix(c(h1,h2), c(w1,w2,w5,w6))
+layout(lay.mat)
+par(oma=c(1,0,0,0)) # Thin outer margins
+
+# Text size
+xaxis.cex <- 0.7
+xaxis.spine.cex <- 0.6 
+
+## Best response
+resp_palette <- c("green", "darkgoldenrod1", "red", "grey") 
+names(resp_palette) <- c("PR", "SD", "PD", "NE")
+best_resp_col1 <- resp_palette[best_resp_all1$bor]
+best_resp_col2 <- resp_palette[best_resp_all2$bor]
+
+#----------------------------------------------------------------------------------
+# Empty plot
+#----------------------------------------------------------------------------------
+## ANALYZED panel
+par(mar=c(bt,0,tp,2))
+# Make the horizontal bars for tumor mutations
+ytick1 <- barplot(rep(NA, length(anlys_ord)), horiz=TRUE, axes=FALSE, width=0.8, space=0.25,
+                  ylim=c(0.6-yex, length(anlys_ord)-0.4+yex),
+                  xlim=c(-10,0),
+                  col=NA, border=NA,
+                  yaxs="i")
+
+# Adding y-axis on the right
+axis(4, at=ytick1, labels=anlys_ord, line=-0.5, las=2, lwd=0, font=1)
+
+## LEFT OUT panel
+par(mar=c(r12*bt,0,r12*tp,2))
+# Make the horizontal bars for tumor mutations
+ytick2 <- barplot(rep(NA, length(lefto_ord)), horiz=TRUE, axes=FALSE, width=0.8, space=0.25,
+                  ylim=c(0.6-r12*yex, length(lefto_ord)-0.4+r12*yex),
+                  xlim=c(-10,0),
+                  col=NA, border=NA,
+                  yaxs="i")
+
+# Adding y-axis on the right
+axis(4, at=ytick2, labels=lefto_ord, line=-0.5, las=2, lwd=0, font=1)
+
+#-----------------------------------------------------------
+# Baseline MAF
+#----------------------------------------------------------------------------------
+breaks <- pretty(c(delfi_scr_basl$ARTEMIS_single_DELFI_SSLs_Ensemble, delfi_scr_ontr$ARTEMIS_single_DELFI_SSLs_Ensemble))
+
+## ANALYZED panel
+par(mar=c(bt,4,tp,0))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = -delfi_scr_bsl1$ARTEMIS_single_DELFI_SSLs_Ensemble, y = c(1:nrow(delfi_scr_bsl1)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = sort(-range(breaks)), cex=2,
+     ylim = c(1-yex, nrow(delfi_scr_bsl1)+yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(delfi_scr_bsl1), function(i) {
+     lines(c(-delfi_scr_bsl1$ARTEMIS_single_DELFI_SSLs_Ensemble[c(1:nrow(delfi_scr_bsl1)) == i], 0), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=-delfi_scr_bsl1$ARTEMIS_single_DELFI_SSLs_Ensemble, y=1:nrow(delfi_scr_bsl1), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+# Draw x-axis at the top
+axis(3, at=-breaks, labels=breaks, lwd=1, font=1)
+mtext("Baseline Artemis-DELFI score", 3, cex=xaxis.cex, line=2.5)
+
+## LEFT OUT panel
+par(mar=c(r12*bt,4,r12*tp,0))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = delfi_scr_bsl2$ARTEMIS_single_DELFI_SSLs_Ensemble, y = c(1:nrow(delfi_scr_bsl2)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = sort(-range(breaks)), cex=2,
+     ylim = c(1-r12*yex, nrow(delfi_scr_bsl2)+r12*yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(delfi_scr_bsl2), function(i) {
+     lines(c(-delfi_scr_bsl2$ARTEMIS_single_DELFI_SSLs_Ensemble[c(1:nrow(delfi_scr_bsl2)) == i], 0), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=-delfi_scr_bsl2$ARTEMIS_single_DELFI_SSLs_Ensemble, y=1:nrow(delfi_scr_bsl2), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+# Draw x-axis at the top
+#axis(3, at=-breaks, labels=breaks, lwd=1, font=1)
+#mtext("Baseline DELFI score", 3, cex=xaxis.cex, line=2.5)
+
+
+#----------------------------------------------------------------------------------
+# Best RECIST response
+#----------------------------------------------------------------------------------
+## ANALYZED panel
+par(mar=c(bt,0,tp,0))
+plot(x=rep(0, nrow(best_resp_all1)), y=1:nrow(best_resp_all1),
+     pch=22, col="grey", bg=best_resp_col1,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-yex, nrow(best_resp_all1)+yex),
+     yaxs="i")
+mtext("BOR\nRECIST", 3, las=2, cex=xaxis.spine.cex)
+
+## LEFT OUT panel 
+par(mar=c(r12*bt,0,r12*tp,0))
+plot(x=rep(0, nrow(best_resp_all2)), y=1:nrow(best_resp_all2),
+     pch=22, col="grey", bg=best_resp_col2,
+     bty="n", axes=FALSE, xlab="", ylab="", cex=2, font=1,
+     ylim = c(1-r12*yex, nrow(best_resp_all2)+r12*yex),
+     yaxs="i")
+#mtext("BOR\nRECIST", 3, las=2, cex=xaxis.spine.cex)
+
+#----------------------------------------------------------------------------------
+# On-treatment MAF
+#----------------------------------------------------------------------------------
+breaks <- pretty(c(delfi_scr_basl$ARTEMIS_single_DELFI_SSLs_Ensemble, delfi_scr_ontr$ARTEMIS_single_DELFI_SSLs_Ensemble))
+
+## ANALYZED panel
+par(mar=c(bt,0,tp,4))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = delfi_scr_ont1$ARTEMIS_single_DELFI_SSLs_Ensemble, y = c(1:nrow(delfi_scr_ont1)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = range(breaks), cex=2,
+     ylim = c(1-yex, nrow(delfi_scr_ont1)+yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(delfi_scr_ont1), function(i) {
+     lines(c(0,delfi_scr_ont1$ARTEMIS_single_DELFI_SSLs_Ensemble[c(1:nrow(delfi_scr_ont1)) == i]), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=delfi_scr_ont1$ARTEMIS_single_DELFI_SSLs_Ensemble, y=1:nrow(delfi_scr_ont1), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+# Draw x-axis at the top
+axis(3, at=breaks, labels=breaks, lwd=1, font=1)
+mtext("On-treatment Artemis-DELFI score", 3, cex=xaxis.cex, line=2.5)
+
+## LEFT OUT panel
+par(mar=c(r12*bt,0,r12*tp,4))
+# Make the lollipop plot
+# Empty plot - draw the points on top of sticks
+plot(x = delfi_scr_ont2$ARTEMIS_single_DELFI_SSLs_Ensemble, y = c(1:nrow(delfi_scr_ont2)), bty="n", axes=FALSE,
+     xlab = "", ylab = "", pch = NA, xlim = range(breaks), cex=2,
+     ylim = c(1-r12*yex, nrow(delfi_scr_ont2)+r12*yex),
+     yaxs="i")
+# Draw the sticks
+sapply(1:nrow(delfi_scr_ont2), function(i) {
+     lines(c(0,delfi_scr_ont2$ARTEMIS_single_DELFI_SSLs_Ensemble[c(1:nrow(delfi_scr_ont2)) == i]), c(i,i),
+           col="grey", lwd=2)})
+# Draw the heads
+points(x=delfi_scr_ont2$ARTEMIS_single_DELFI_SSLs_Ensemble, y=1:nrow(delfi_scr_ont2), pch=16)
+
+# Draw y-axis using abline
+abline(v=0, lwd=1)
+
+#----------------------------------------------------------------------------------
+# Adding floating legend for BOR 
+#----------------------------------------------------------------------------------
+add.legend(title="BOR RECIST", x=0.65, y=6, xadj=0.022, 
+           labels=names(resp_palette), col_palette=resp_palette, border="grey")
+
+#----------------------------------------------------------------------------------
+
+# Draw x-axis at the top
+#axis(3, at=breaks, labels=breaks, lwd=1, font=1)
+#mtext("On-treatment DELFI score", 3, cex=xaxis.cex, line=2.5)
+
+#----------------------------------------------------------------------------------
+# Annotations
+#----------------------------------------------------------------------------------
+par(fig=c(0,1,0,1), mar=c(0,1,0,1), new=TRUE)
+
+# Samples that were dropped from the analysis, because of missing data
+plot(c(-10,10), 15*c(1,1), col=NA, axes=FALSE, xpd=TRUE)
+text(0.63,11.00, "Not evaluable \n(Missing on-treatment blood draw)", adj=0.5)
+draw.bracket(0.75,10.60,-10.5,10)
+
+#----------------------------------------------------------------------------------
+```

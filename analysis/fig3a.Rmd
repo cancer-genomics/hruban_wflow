@@ -1,0 +1,174 @@
+---
+title: cfDNA fragmentation features reflect underlying tumor biology in pancreatic cancer  
+---
+
+
+Plasma z-scores by chromosome arm versus median tumor log-ratio by arm for patients who had greater than 10% plasma MAF by WGMAF.
+
+
+```{r packages, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(data.table)
+library(RColorBrewer)
+library(ggpmisc)
+library(here)
+devtools::load_all(here("code/liver.tools"))
+source(here("code/functions.R"))
+```
+
+
+```{r load_data, echo=FALSE, message=FALSE, warning=FALSE}
+# Tumor data
+fnames <- list.files(here("data/estimates"), pattern=".tsv$")
+noares <- fnames %>%
+    file.path(here("data/estimates"), .) %>%
+    map_dfr(get_cnv)
+noares1 <- noares %>%
+    mutate(colors= case_when((cnv_score>=.05) ~ "Positive",
+    (cnv_score>=(-.05)) ~ "Neutral",
+    (cnv_score<(-.05)) ~ "Negative"))
+noares1$colors<-factor(noares1$colors, levels=c("Positive","Neutral","Negative"))
+noares1 <- noares1 %>% mutate(transp=if_else(colors=="Neutral",1,1))
+noares1$y=1
+noares1<-noares1 %>% rename(Arm= chrarm)
+noares1  <- noares1 %>%rename(id=ID)
+noares1<-noares1 %>% mutate(BOR="Tumor")
+noares1  <- noares1 %>%
+        rename(z=cnv_score) %>%
+        mutate(root2=nroot(z, 2)) %>%
+        mutate(root3=nroot(z, 3))
+noares2<-noares1 %>% mutate(source="Tumor")
+noares2<-noares2 %>% mutate(scaled=z)
+
+# Plasma data
+features <- read_csv(here("data/checkpac_features.csv"))
+clean_data<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S1",range="A2:X45")
+delfi_pred<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S2",range="A2:P219")
+delfi_pred<-delfi_pred %>% filter(Timepoint!="follow up", Timepoint!="cycle 1")
+DELFI_complete<-inner_join(delfi_pred,clean_data, by="Patient")
+DELFI_complete$id<-DELFI_complete$Sample
+DELFI_complete<-DELFI_complete %>% mutate(BOR = case_when((Timepoint == "Baseline") ~ "Baseline",
+                                        TRUE ~ `BOR RECIST 1.1`))
+DELFI_complete<-DELFI_complete %>% filter(`BOR RECIST 1.1`!="Not Evaluable")
+
+cols <- c("#FF6636","#66CCCC","#FFCC66","#FFCC66","#66CCCC","#FFFF00","#FF9900")
+features <- features %>% select(id,starts_with("z"))
+features <- inner_join(features, DELFI_complete %>%
+                                     select(id,BOR),
+                           by=c("id"="id"))
+features <- features %>%
+        gather(key="Arm", value="Zscore", starts_with("z"))
+features$Arm <- sapply( str_split(features$Arm,"_"), "[", 2 )
+chrlevels <- c("1p","1q","2p","2q","3p","3q","4p","4q","5p",
+                   "5q","6p","6q","7p","7q","8p","8q","9p","9q",
+                   "10p","10q","11p","11q","12p","12q",
+                   "13q","14q","15q","16p","16q","17p","17q",
+                   "18p","18q","19p","19q","20p","20q","21q","22q")
+features$Arm <- factor(features$Arm,
+                           levels = chrlevels)
+features <- features %>% mutate(colors=if_else(Zscore<=0,"Negative","Positive"))
+features <- features %>%
+        mutate(colors=if_else(Zscore>= -3.22 & Zscore <= 3.22 ,
+                              "Neutral", features$colors))
+features <- features %>% mutate(transp=if_else(colors=="Neutral",1,1))
+
+features$colors<-factor(features$colors,levels=c("Positive","Negative","Neutral"))
+features$y=1
+
+features <- features %>% mutate(Zscore=if_else(Zscore<=-150,-150,Zscore))
+features <- features %>% mutate(Zscore=if_else(Zscore>150,150,Zscore))
+features2  <- features %>%
+        rename(z=Zscore) %>%
+        mutate(root2=nroot(z, 2)) %>%
+        mutate(root3=nroot(z, 3))
+features2<-features2 %>%mutate(source="Plasma")
+features2<-features2 %>% mutate(scaled=z)
+features3<-rbind(features2, noares2)
+```
+
+
+```{r fig3a, fig.height=3, fig.width=12, dev=c("png", "pdf")}
+features4<-features3 %>% filter(BOR!="Stable Disease", BOR!="Progressive Disease", BOR!="Partial Response")
+features4$id <- str_extract(features4$id, "CGPLPA[0-9]{1,10}")
+features4$id <- paste0(features4$id, "P")
+
+features4<-features4 %>% filter(id!="CGPLPA217P")
+features4<-features4 %>% filter(id!="CGPLPA218P")
+features4<-features4 %>% filter(id!="CGPLPA219P")
+features4<-features4 %>% filter(id!="CGPLPA220P")
+features4<-features4 %>% filter(id!="CGPLPA221P")
+features4<-features4 %>% filter(id!="CGPLPA222P")
+#features4<-features4 %>% filter(id!="CGPLPA223P")
+features4<-features4 %>% filter(id!="CGPLPA224P")
+features4<-features4 %>% filter(id!="CGPLPA225P")
+features4<-features4 %>% filter(id!="CGPLPA226P")
+features4<-features4 %>% filter(id!="CGPLPA765P")
+features4<-features4 %>% filter(id!="CGPLPA766P")
+features4<-features4 %>% filter(id!="CGPLPA767P")
+features4<-features4 %>% filter(id!="CGPLPA768P")
+features4<-features4 %>% filter(id!="CGPLPA769P")
+features4<-features4 %>% filter(id!="CGPLPA770P")
+features4<-features4 %>% filter(id!="CGPLPA771P")
+features4<-features4 %>% filter(id!="CGPLPA772P")
+features4<-features4 %>% filter(id!="CGPLPA773P")
+#features4<-features4 %>% filter(id!="CGPLPA774P")
+features4<-features4 %>% filter(id!="CGPLPA775P")
+features4<-features4 %>% filter(id!="CGPLPA776P")
+features4<-features4 %>% filter(id!="CGPLPA777P")
+features4<-features4 %>% filter(id!="CGPLPA778P")
+features4<-features4 %>% filter(id!="CGPLPA779P")
+features4<-features4 %>% filter(id!="CGPLPA780P")
+features4<-features4 %>% filter(id!="CGPLPA781P")
+features4<-features4 %>% filter(id!="CGPLPA782P")
+features4<-features4 %>% filter(id!="CGPLPA783P")
+features4<-features4 %>% filter(id!="CGPLPA784P")
+features4<-features4 %>% filter(id!="CGPLPA785P")
+#features4<-features4 %>% filter(id!="CGPLPA786P")
+#features4<-features4 %>% filter(id!="CGPLPA787P")
+#features4<-features4 %>% filter(id!="CGPLPA788P")
+features4<-features4 %>% filter(id!="CGPLPA789P")
+features4<-features4 %>% filter(id!="CGPLPA790P")
+features4<-features4 %>% filter(id!="CGPLPA791P")
+features4<-features4 %>% filter(id!="CGPLPA792P")
+features4<-features4 %>% filter(id!="CGPLPA793P")
+#features4<-features4 %>% filter(id!="CGPLPA794P")
+features4<-features4 %>% filter(id!="CGPLPA795P")
+features4<-features4 %>% filter(id!="CGPLPA796P")
+features4<-features4 %>% filter(id!="CGPLPA797P")
+
+minimize<-select(features4, id, Arm, z, source)
+minimize1<-minimize %>% filter(source=="Plasma")
+minimize1<-minimize1 %>% rename(z_plasma=z)
+
+minimize2<-minimize %>% filter(source=="Tumor")
+minimize2<-minimize2 %>% rename(z_tumor=z)
+
+new_dataset <- minimize1 %>% inner_join(minimize2, by=c("id","Arm"))
+
+new_dataset2<-new_dataset %>% mutate(Arm2=case_when(Arm=="8q"~"8q", TRUE ~ 'other'))
+
+lm_fit<-lm(z_plasma ~ z_tumor, data=new_dataset2)
+summary(lm_fit)
+
+formula <- y ~ x
+ggplot(new_dataset2,  aes(x = z_plasma, y = z_tumor, color=id)) + 
+  geom_point()+
+  geom_hline(yintercept =0)+
+  geom_vline(xintercept =0)+
+  geom_smooth(method = "lm", formula = formula, se = F) +
+  facet_wrap(~id, ncol=6) +
+  theme(text = element_text(size=6),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title="Tumor CNV vs Plasma Z-scores", x ="Plasma Z scores", y = "Tumor median log-ratio")+
+  stat_poly_eq(aes(label = paste(..rr.label..)), 
+              label.x = 30, label.y =.1,
+              formula = formula, parse = TRUE, size = 2)+
+  stat_fit_glance(method = 'lm',
+                  method.args = list(formula = formula),
+                  geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 4), sep = "")),
+                  label.x = 85, label.y = -0.8, size = 2) +
+  theme_classic() +
+  theme(legend.position = "none")
+```

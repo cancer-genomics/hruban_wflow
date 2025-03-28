@@ -1,0 +1,93 @@
+---
+title: Survival analyses for RECIST scoring at first follow up scan and for BOR RECIST in CheckPAC trial
+---
+
+
+Kaplan-Meier curves of overall survival probability based on first RECIST follow-up scan, and clinical BOR. Patients are Separated into partial response, stable disease, and progressive disease.
+
+
+```{r packages, message = FALSE}
+library(ggpubr)
+library(here)
+library(readxl)
+library(survival)
+library(survminer)
+library(tidyverse)
+```
+
+```{r load_data}
+clean_data <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S1", range = "A2:X45")
+delfi_pred <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S2", range = "A2:P219")
+```
+
+
+```{r ext-fig14, fig.height = 7, fig.width = 15, dev = c("png", "pdf")}
+clean_data <- clean_data %>%
+  filter(`RECIST at FU 1` != "Not Evaluable")
+delfi_pred <- delfi_pred %>%
+  filter(Timepoint == "Endpoint")
+
+DELFI_complete <- delfi_pred %>%
+  inner_join(clean_data, by = "Patient") %>%
+  mutate(across("Deceased", str_replace, "Yes", "1"),
+         across("Deceased", str_replace, "No", "0")) %>%
+  mutate(`OS (days)` = as.numeric(`OS (days)`),
+         `PFS (days)` = as.numeric(`PFS (days)`),
+         `Deceased` = as.numeric(Deceased),
+         `FU1` = as.character(`RECIST at FU 1`),
+         `BOR` = as.character(`BOR RECIST 1.1`))
+
+p <- vector("list", 2)
+
+fit <- survfit(Surv(`OS (days)`, Deceased) ~ FU1, data = DELFI_complete)
+
+p[[1]] <- fit %>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.col = "strata",
+             surv.median.line = "hv",
+             #title = "Overall survival based on RECIST Follow up",
+             ylab = "Overall survival probability",
+             xlab = "Time in Days",
+             ggtheme = theme_classic2(base_size = 11),
+             legend = c(.9, .75),
+             legend.title = element_blank(),
+             legend.labs = c("PR", "PD", "SD"),
+             pval.size = 3, pval.coord = c(400, .25))
+
+p[[1]]$plot <- p[[1]]$plot +
+  annotate("text", x = 1600, y = 0.95,
+           label = "RECIST 1.1 assessment\n(8 weeks)",
+           size = 3, hjust = 0)
+
+fit <- survfit(Surv(`OS (days)`, Deceased) ~ BOR, data = DELFI_complete)
+
+p[[2]] <- fit %>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.col = "strata",
+             surv.median.line = "hv",
+             #title = "Overall survival based on BOR",
+             xlab = "Time in Days",
+             ylab = "Overall survival probability",
+             ggtheme = theme_classic2(base_size = 11),
+             legend = c(.9, .75),
+             legend.title = element_blank(),
+             legend.labs = c("PR", "PD", "SD"),
+             pval.size = 3, pval.coord = c(750, .25))
+
+p[[2]]$plot <- p[[2]]$plot +
+  annotate("text", x = 1600, y = 0.95,
+           label = "Best overall response\nRECIST 1.1 assessment",
+           size = 3, hjust = 0)
+
+arrange_ggsurvplots(p, nrow = 1)
+
+coxFU1 <- coxph(Surv(`OS (days)`, Deceased) ~ FU1, data = DELFI_complete)
+summary(coxFU1)
+
+coxBOR <- coxph(Surv(`OS (days)`, Deceased) ~ BOR, data = DELFI_complete)
+summary(coxBOR)
+```
+
+
+
+

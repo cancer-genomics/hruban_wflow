@@ -1,0 +1,145 @@
+---
+title: Fragmentation patterns for patients in CheckPAC trial with partial response or stable disease are more closely correlated to healthy plasma
+---
+
+
+cfDNA fragmentation profiles from CheckPAC patients are shown as short to long ratios of fragment size in 473 5-Mb bins across the genome. Profiles are shown for all patients with plasma samples at baseline, and at follow-up for each of the clinical RECIST 1.1 response categories. Each profile is colored by correlation to the median profile of healthy reference samples
+
+
+```{r packages, message=FALSE}
+library(cowplot)
+library(fs)
+library(grid)
+library(here)
+library(readxl)
+library(tidyverse)
+devtools::load_all(here("code/rlucas"))
+```
+
+
+```{r load_data, message=FALSE}
+df <- list.files(path = here("data/checkpac_5mb_bins"), full.names = TRUE) %>%
+  lapply(read_csv) %>%
+  bind_rows %>%
+  filter(chr != "chrX") %>%
+  as_tibble() %>%
+  mutate(ratio.cor = short.cor / long.cor) %>%
+  group_by(id) %>%
+  mutate(ratio.centered = scale(ratio.cor, scale = FALSE)[, 1])
+
+clean_data <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S1", range = "A2:X45")
+delfi_pred <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S2", range = "A2:N219")
+```
+
+```{r}
+clean_data <- clean_data %>%
+  filter(`BOR RECIST 1.1` != "Not Evaluable")
+delfi_pred <- delfi_pred %>%
+  filter(Timepoint %in% c("Baseline", "Endpoint"))
+DELFI_complete <- delfi_pred %>%
+  inner_join(clean_data, by = "Patient") %>%
+  mutate(class = case_when((Timepoint == "Baseline") ~ "Baseline",
+                           TRUE ~ `BOR RECIST 1.1`)) %>%
+  distinct(Patient, class, .keep_all = TRUE)
+DELFI_complete$id <- DELFI_complete$Sample
+
+fp2 <- inner_join(DELFI_complete, df, by = "id")
+
+fp2 <-  arrange(fp2, id, bin) %>%
+    mutate(bin=factor(bin),
+           arm=factor(arm, levels=unique(arm))) %>%
+    mutate(dx=factor(class, levels=c("Baseline","Progressive Disease","Stable Disease","Partial Response")))
+
+panel.labels <- fp2 %>%
+    group_by(dx) %>%
+    summarize(n=length(unique(id)),
+              .groups="drop") %>%
+    mutate(labels=paste0(c("Baseline (n=",
+                           "Progressive Disease (n=",
+                           "Stable Disease (n=", 
+                           "Partial Response (n="
+                           ),
+                         n, ")"),
+           arm="1p") %>%
+    mutate(x=rep(5,4), y=rep(0.2, 4))
+
+
+arm <- fp2 %>% group_by(arm) %>%
+  summarize(n=n(), .groups="drop") %>%
+  mutate(arm = as.character(arm))
+arm.labels <- setNames(arm$arm, arm$arm)
+```
+
+```{r}
+#baseline
+b<-read.csv(here("data/fp2_lucas_healthy.csv"))
+medians<-b%>%group_by(bin)%>% summarise(Median=median(ratio.centered))
+medians$bin <- as.factor(medians$bin)
+
+cors<-left_join(fp2, medians, by="bin")
+
+cors<-cors %>% group_by(id) %>% summarize(c=cor(ratio.centered, Median, method="spearman"))
+
+fp2<-left_join(fp2,cors, by = "id")
+df5<-fp2
+
+df5<-df5 %>% mutate(d= case_when((c<=.25) ~ "0.00-0.25",
+                                     (c<=.5) ~ "0.25-0.50",
+                                     (c<= .75) ~ "0.50-0.75",
+                                     (c<=1) ~"0.75-1.00"))
+
+df5$class <- ordered(df5$class, levels = c("Baseline","Progressive Disease" , "Stable Disease","Partial Response"))
+
+```
+
+
+```{r ext-fig8, fig.width = 36, fig.height = 20, dev = c("png", "pdf") }
+fig <- df5 %>%
+  group_by(dx) %>%
+  ggplot(aes(x = bin, y = ratio.centered, group = reorder(id, -c), col = d)) +
+  geom_line(size = 0.75) +
+  scale_color_manual(values = c("#B71643CA", "#EB6429FF", "grey70")) +
+  labs(x = "", y = "Fragmentation profile\n", color = "") +
+  facet_grid(dx ~ arm,
+             space = "free_x", scales = "free_x",
+             labeller = labeller(arm = arm.labels),
+             switch = "x") +
+  theme_classic(base_size = 25) +
+  theme(axis.text.x = element_blank(),
+        panel.spacing.y = unit(2, "lines"),
+        panel.spacing.x = unit(.2, "lines"),
+        axis.ticks.x = element_blank(),
+        strip.background = element_blank(),
+        strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 26),
+        strip.text.x  = element_text(angle = 90),
+        axis.title.y = element_text(size = 30),
+        legend.position = c(0.8, 0.95),
+        legend.direction = "horizontal") +
+  scale_y_continuous(breaks = c(-0.2, -0.1, 0, 0.1, 0.2)) +
+  coord_cartesian(ylim = c(-0.19, 0.19))
+
+ggdraw(fig) +
+  draw_grob(textGrob(label = panel.labels$labels[1],
+                     x = unit(0.15, "npc"),
+                     y = unit(0.97, "npc"),
+                     hjust = 0,
+                     gp = gpar(cex = 2))) +
+  draw_grob(textGrob(label = panel.labels$labels[2],
+                     x = unit(0.15, "npc"),
+                     y = unit(0.75, "npc"),
+                     hjust = 0,
+                     gp = gpar(cex = 2))) +
+  draw_grob(textGrob(label = panel.labels$labels[3],
+                     x = unit(0.15, "npc"),
+                     y = unit(0.53, "npc"),
+                     hjust = 0,
+                     gp = gpar(cex = 2))) +
+  draw_grob(textGrob(label = panel.labels$labels[4],
+                     x = unit(0.15, "npc"),
+                     y = unit(0.30, "npc"),
+                     hjust = 0,
+                     gp = gpar(cex = 2)))
+```

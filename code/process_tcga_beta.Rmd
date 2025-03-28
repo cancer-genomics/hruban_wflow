@@ -1,0 +1,53 @@
+---
+title: "Process TCGA beta values"
+author: "Carlie"
+date: "`r Sys.Date()`" 
+output: html_document
+---
+
+Load packages and functions
+```{r setup, include=FALSE}
+library(data.table)
+library(matrixStats)
+library(tidyverse)
+library(here)
+outdir <- here("output", "process_tcga_beta.Rmd")
+fs::dir_create(outdir)
+source(here("code/functions.R"))
+```
+
+Load beta values, select chr and drop intervals with lot of NA
+```{r load_data}
+sel_chr <- readLines(here("data/sel_chr.txt"))
+pch_thr <- 0.50
+out <- fread(here("extdata/paad_betas_100kb.csv"))
+out_chr <- out[chr == sel_chr]
+nas <- out_chr[, .(nanum = sum(is.na(beta)), id_num = .N), by = start]
+nas <- nas[, .(drop_int = nanum / id_num > pch_thr), by = start]
+out_chr_flt <- nas[out_chr, on = .(start)]
+out_chr_flt <- out_chr_flt[drop_int == FALSE]
+betas_wide <- dcast(out_chr_flt, id ~ start, value.var = "beta")
+```
+
+Extract first PC after imputation
+```{r compute_pca}
+mat <- as.matrix(betas_wide[, -1])
+mat_imp <- .imputeMatrix(mat)
+eigen <- .svd.qr(mat_imp)
+eigen <- scale(.standardize(eigen))
+```
+
+Apply mean filter to PC and add to chr, start, end intervals
+```{r smooth_uniq}
+eigen2 <- .meanSmoother(eigen)
+eigen3 <- .meanSmoother(eigen2, iter = 4)
+out_chr_uniq <- unique(out_chr_flt[, .(chr, start, end, arm, nprobes)])
+paadbins <- out_chr_uniq[, `:=`(eigen = eigen3)]  # only save the smooth version
+```
+
+Label open-closed domains and save
+```{r label_AB}
+paadbins[, domain := ifelse(eigen < 0, "open", "closed")]  # <!> check signs
+paadbins[, domain := factor(domain)]
+saveRDS(paadbins, file.path(outdir, "paad_bins_100kb_sel_chr.rds"))
+```

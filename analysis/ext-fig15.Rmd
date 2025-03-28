@@ -1,0 +1,179 @@
+---
+title: Timepoints selected for CA19-9 and CT for patients in CheckPAC trial 
+---
+
+
+Blue lines indicate the date of CT. Red-X indicates patients dropped due to missing sample. The highlighted blue region is the 0.05-0.95 Quantiles of timepoint selection. Fourth follow up CA19-9 timepoints were selected as follow-up, which are outlined in black. In the legend, timepoint (baseline, 1-5 or NA) indicates follow up CA19-9 sample number. 
+
+
+```{r load_packages, message = FALSE}
+library(data.table)
+library(here)
+library(lubridate)
+library(readxl)
+library(tidyverse)
+source(here("code/utility_funcs.R"))
+```
+
+**NOTE**: it's better to move this code to `code` and refer to its output in analysis
+and drop the copy from data
+```{r load_data}
+# Load the master ID map file - from Carlie
+id_map <- read_excel(here("data/ID_comparison.xlsx")) %>%
+  select(cgid = CGID, subject_id = StudySubjectID) %>%
+  mutate(patient_id = gsub("P[0-9]{0,2}$", "", cgid)) %>%
+  select(-cgid)
+
+# Load the blood draw dates
+mfst <- read.csv(here("data/checkpac_ca199.csv")) %>%
+  mutate(visit_cycle = ifelse(lab_suffix == "E1_C4",
+                              "baseline",
+                              as.character(cyclenumber - 1)),
+         ca199 = ifelse(ca199 == -999, NA, ca199),
+         subject_id = str_pad(subject_id, 3, "left", "0"),
+         lab_date = as.Date(lab_date)) %>%
+  select(-c(lab_suffix, cyclenumber)) %>%
+  drop_na()
+
+# Load the clinical data
+# Keep the treatment start date, imaging date and blood draw dates
+clin_data <- read_excel(here("data/clinical_073123.xlsx"),
+                        sheet = "CheckPAC_DATA4_OSupdate_tojh") %>%
+  select(subject_id = StudySubjectID,
+         tx_start_date = Nivo_StartDate,
+         starts_with("IT_0_")) %>%
+  rename(ct_flwup_date = IT_0_E4_C19_1)
+
+# Fill the missing imaging date with the next available date
+# this is based on my examination of the data
+# Find the next available date
+ct_missing_fill <- clin_data %>%
+  select(subject_id, starts_with("IT_0_")) %>%
+  pivot_longer(cols = -subject_id,
+               names_to = "visit_id", values_to = "visit_date") %>%
+  filter(visit_date != "#NULL!") %>%
+  distinct(subject_id, .keep_all = TRUE)
+
+ct_missing_fill_names <- ct_missing_fill$subject_id
+ct_missing_fill <- ct_missing_fill$visit_date
+names(ct_missing_fill) <- ct_missing_fill_names
+
+# Fill the dates that are missing
+clin_data <- clin_data %>%
+  mutate(ct_flwup_date = ifelse(ct_flwup_date == "#NULL!",
+                                ct_missing_fill[subject_id], ct_flwup_date)) %>%
+  select(-starts_with("IT_0_"))
+
+# Combine the plasma manifest with the clinical data
+all_data <- inner_join(clin_data, id_map, by = "subject_id") %>%
+  inner_join(mfst, by = "subject_id")
+
+for (i in colnames(all_data)) {
+  if (str_detect(i, "[Dd]ate")) {
+    if (!(any(class(all_data[[i]]) == "POSIXt") || (class(all_data[[i]]) == "Date")))  {
+      all_data[[i]] <- as.Date(as.numeric(all_data[[i]]), origin = "1899-12-30")
+    } else {
+      all_data[[i]] <- as.Date(all_data[[i]])
+    }
+  }
+}
+```
+
+
+```{r days_from_tx}
+# Compute days from the treatment
+all_data2 <- all_data %>%
+  mutate(days_from_tx = as.numeric(difftime(lab_date, tx_start_date,
+                                            units = "days")),
+         days_btw_tx_ct = as.numeric(difftime(ct_flwup_date, tx_start_date,
+                                              units = "days")))
+
+# Order patients based on baseline blood draw date
+patient_order <- all_data2 %>%
+  group_by(patient_id) %>%
+  summarize(order_baseline = min(days_from_tx, na.rm = TRUE)) %>%
+  ungroup() %>%
+  arrange(order_baseline) %>%
+  pull(patient_id)
+
+# Select P2 dates for on-treatment
+date_blp2s <- all_data2 %>%
+  group_by(patient_id) %>%
+  summarize(patient_id = patient_id[1],
+            tx_start_date = tx_start_date[1],
+            ct_flwup_date = ct_flwup_date[1],
+            baseline = get_baseline(lab_date, tx_start_date),
+            endpoint = get_p2(lab_date, visit_cycle),
+            ct_flwup = ifelse(all(is.na(ct_flwup_date)), FALSE, TRUE)) %>%
+  ungroup()
+
+attach(date_blp2s)
+dmin <- quantile(as.numeric(endpoint-tx_start_date), p=0.05, na.rm=TRUE)
+dmax <- quantile(as.numeric(endpoint-tx_start_date), p=0.95, na.rm=TRUE)
+detach(date_blp2s)
+
+#dir.create("output")
+#write.csv(date_blp2s, "output/checkpac_baseline_p2_dates.csv", quote=FALSE, row.names=FALSE)
+```
+
+
+```{r ext-fig15, fig.width = 10, fig.height = 7, dev = c("png", "pdf")}
+blp2s <- date_blp2s %>%
+  select(patient_id, baseline, endpoint) %>%
+  pivot_longer(-patient_id,
+               names_to = "timepoint", values_to = "date_blood_draw")
+
+blp2_avail <- date_blp2s %>%
+  mutate(baseline = ifelse(!is.na(baseline), TRUE, FALSE),
+         endpoint = ifelse(!is.na(endpoint), TRUE, FALSE)) %>%
+  mutate(keep_patient = baseline & endpoint) %>%
+  #mutate(keep_patient = endpoint) %>%
+  select(patient_id, keep_patient) %>%
+  mutate(selection = ifelse(keep_patient, "", "X")) %>%
+  mutate(patient_id = factor(patient_id, levels = patient_order),
+         patient_yc = as.numeric(patient_id))
+
+all_data3 <- all_data2 %>%
+  rename(date_blood_draw = lab_date) %>%
+  left_join(blp2s) %>%
+  mutate(twomonth_mark = ifelse(visit_cycle == "4", 1, NA)) %>%
+  mutate(patient_id = factor(patient_id, levels = patient_order),
+         patient_yc = as.numeric(patient_id),
+         visit_cycle = factor(visit_cycle,
+                              levels = c("baseline", 1, 2, 3, 4, 5))) %>%
+  mutate(selected = ifelse(timepoint %in% c("baseline", "endpoint"), 1,
+                           ifelse(is.na(visit_cycle), 0, 0.3)))
+
+ggplot() +
+  geom_point(data = all_data3, aes(x = days_from_tx, y = patient_yc,
+                                   color = visit_cycle)) +
+  geom_point(data = all_data3, aes(x = days_from_tx, y = patient_yc,
+                                   shape = twomonth_mark)) +
+  scale_shape_identity() +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_segment(data = all_data3,
+               aes(x = days_btw_tx_ct, xend = days_btw_tx_ct,
+                   y = patient_yc - 0.25, yend = patient_yc + 0.25),
+               linetype = "dashed", color = "blue") +
+  geom_rect(aes(xmin = dmin, xmax = dmax, ymin = -Inf, ymax = Inf),
+            fill = "steelblue", alpha = 0.1) +
+  scale_x_continuous(breaks = seq(-42, 119, 7), labels = seq(-42, 119, 7),
+                     expand = c(0, 0)) +
+  scale_y_continuous(breaks = sort(unique(all_data3$patient_yc)),
+                     labels = levels(all_data3$patient_id),
+                     sec.axis = sec_axis(~., breaks = blp2_avail$patient_yc,
+                                         labels = blp2_avail$selection),
+                     expand = c(0, 0)) +
+  coord_cartesian(xlim = c(-42, 105)) +
+  labs(x = "Days from treatment", y = "", title = NULL) +
+  theme_bw() +
+  theme(axis.text.y.right = element_text(color = "red"),
+        panel.grid.major.x = element_line(linetype = 3),
+        panel.grid.major.y = element_line(linetype = 3),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  guides(color = guide_legend(title = "Timepoint"),
+         alpha = "none")
+```
+
+

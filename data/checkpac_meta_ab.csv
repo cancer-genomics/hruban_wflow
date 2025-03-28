@@ -1,0 +1,7 @@
+patients,cgid,id,timepoint,tumor_type,subtype,molecular_response,recist_bor,ichortf,delfi_tf
+CGPLPA223P,CGPLPA223P,CGPLPA223P,Baseline,Pancreas,Pancreas,Pancreas,Pancreas,0.01108,0.211366578
+CGPLPA774P,CGPLPA774P,CGPLPA774P,Baseline,Pancreas,Pancreas,Pancreas,Pancreas,0.009806,0.190101237
+CGPLPA786P,CGPLPA786P,CGPLPA786P,Baseline,Pancreas,Pancreas,Pancreas,Pancreas,0.01473,0.165668663
+CGPLPA787P,CGPLPA787P,CGPLPA787P,Baseline,Pancreas,Pancreas,Pancreas,Pancreas,0.01566,0.32023043
+CGPLPA788P,CGPLPA788P,CGPLPA788P,Baseline,Pancreas,Pancreas,Pancreas,Pancreas,0.01238,0.100628931
+CGPLPA794P,CGPLPA794P,CGPLPA794P,Baseline,Pancreas,Pancreas,Pancreas,Pancreas,0.02056,0.137449664

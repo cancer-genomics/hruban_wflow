@@ -1,0 +1,42 @@
+---
+title: WGMAF values correlate with targeted MAF analyses
+---
+
+
+WGMAF compared to targeted MAF across all plasma samples assessed by targeted sequencing in subset of patients.  Targeted MAF represents the fraction of mutant to wildtype KRAS sequences in cfDNA or for patients with no KRAS mutation the targeted MAF is the highest fraction of mutant to wildtype sequences observed in that individual.
+
+
+```{r packages, message = FALSE}
+library(here)
+library(ggpubr)
+library(tidyverse)
+library(readxl)
+```
+
+
+```{r load_data}
+wgsmaf_pred <- read_excel(here("data/supplementary_tables.xlsx"),
+                          sheet = "Table S2", range = "A2:P219")
+targeted <- read_excel(here("data/i07_input.xlsx"),
+                       sheet = "checkpac_preds")
+targeted$Sample <- targeted$id
+
+# Combine WGMAF with targeted MAF
+targeted_wgs <- inner_join(wgsmaf_pred, targeted, by = "Sample")
+targeted_wgs <- targeted_wgs %>% filter(WGMAF != "-", `MAF (targeted)` != "NA")
+targeted_wgs$`MAF (targeted)` <- as.numeric(targeted_wgs$`MAF (targeted)`)
+targeted_wgs$WGMAF <- as.numeric(targeted_wgs$WGMAF)
+```
+
+
+```{r ext-fig5, fig.width = 7, fig.height = 7, dev = c("png", "pdf")}
+ggplot(targeted_wgs, aes(x = `MAF (targeted)`, y = WGMAF)) +
+  geom_point() +
+  theme_classic() +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed",
+              color="#00BFC4") +
+  stat_cor(label.y = .2) +
+  coord_cartesian(xlim = c(0, .3), ylim = c(0, .3)) +
+  labs(y = "WGMAF", x = "Targeted MAF")
+```
+

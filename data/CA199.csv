@@ -1,0 +1,392 @@
+﻿subject_id,ca199,lab_date,timepoint,Sample,Secretor
+2,13700,12/5/16,Baseline,CGPLPA217P,Secretor
+2,13500,12/19/16,follow up ,CGPLPA217P1,Secretor
+2,10600,1/2/17,follow up ,,Secretor
+2,7370,1/16/17,follow up ,,Secretor
+2,6250,1/30/17,Endpoint,CGPLPA217P2,Secretor
+2,5670,2/13/17,follow up ,,Secretor
+2,5850,2/27/17,follow up ,,Secretor
+2,6660,3/13/17,follow up ,,Secretor
+2,6530,3/27/17,follow up ,,Secretor
+2,8810,4/11/17,follow up ,,Secretor
+2,12300,4/24/17,follow up ,CGPLPA217P4,Secretor
+2,6800,5/8/17,follow up ,,Secretor
+2,10900,5/22/17,follow up ,CGPLPA217P5,Secretor
+2,11400,6/6/17,follow up ,,Secretor
+2,14500,6/19/17,follow up ,CGPLPA217P6,Secretor
+2,40200,8/28/17,follow up ,CGPLPA217P8,Secretor
+3,19400,12/2/16,Baseline,CGPLPA220P,Secretor
+3,14200,12/16/16,follow up ,CGPLPA220P1,Secretor
+3,7590,1/2/17,follow up ,,Secretor
+3,8310,1/16/17,follow up ,,Secretor
+3,5080,1/30/17,Endpoint,CGPLPA220P2,Secretor
+3,17400,2/13/17,follow up ,,Secretor
+3,22500,2/27/17,follow up ,,Secretor
+3,37700,3/13/17,follow up ,,Secretor
+4,539,12/14/16,Baseline,CGPLPA218P,Secretor
+4,1220,12/28/16,follow up ,CGPLPA218P1,Secretor
+4,1730,1/11/17,follow up ,,Secretor
+4,3350,1/25/17,follow up ,,Secretor
+4,5630,2/8/17,Endpoint,,Secretor
+6,1.00E+05,12/20/16,Baseline,CGPLPA767P,Secretor
+6,36300,1/3/17,follow up ,CGPLPA767P1,Secretor
+6,34300,2/15/17,follow up ,CGPLPA767P2,Secretor
+6,85500,3/1/17,follow up ,,Secretor
+6,161000,3/16/17,Endpoint,CGPLPA767P3,Secretor
+6,259000,3/29/17,follow up ,,Secretor
+6,446000,4/12/17,follow up ,CGPLPA767P4,Secretor
+6,381000,4/24/17,follow up ,,Secretor
+6,619000,5/11/17,follow up ,CGPLPA767P5,Secretor
+6,388000,5/24/17,follow up ,,Secretor
+6,471000,6/7/17,follow up ,,Secretor
+6,855000,6/23/17,follow up ,,Secretor
+7,64,12/28/16,Baseline,CGPLPA768P,Secretor
+7,99,1/11/17,follow up ,CGPLPA768P1,Secretor
+7,32,2/22/17,follow up ,CGPLPA768P2,Secretor
+7,30,3/8/17,follow up ,,Secretor
+7,28,3/22/17,Endpoint,CGPLPA768P3,Secretor
+7,41,4/5/17,follow up ,,Secretor
+7,32,4/19/17,follow up ,CGPLPA768P4,Secretor
+7,37,5/3/17,follow up ,,Secretor
+7,101,5/17/17,follow up ,,Secretor
+7,165,5/31/17,follow up ,CGPLPA768P5,Secretor
+7,221,6/14/17,follow up ,,Secretor
+7,233,6/28/17,follow up ,CGPLPA768P6,Secretor
+7,424,7/12/17,follow up ,,Secretor
+8,22700,1/11/17,Baseline,CGPLPA769P,Secretor
+8,30000,1/25/17,follow up ,CGPLPA769P1,Secretor
+8,34800,2/15/17,follow up ,,Secretor
+9,56,1/27/17,Baseline,CGPLPA221P,Secretor
+9,62,2/13/17,follow up ,CGPLPA221P1,Secretor
+9,56,2/27/17,follow up ,,Secretor
+9,44,3/13/17,follow up ,,Secretor
+9,57,3/27/17,Endpoint,CGPLPA221P2,Secretor
+9,78,4/11/17,follow up ,CGPLPA221P3,Secretor
+11,290,2/22/17,Baseline,CGPLPA770P,Secretor
+11,290,3/7/17,follow up ,CGPLPA770P1,Secretor
+11,337,3/22/17,follow up ,CGPLPA770P2,Secretor
+11,350,4/4/17,follow up ,,Secretor
+11,337,4/18/17,Endpoint,CGPLPA770P3,Secretor
+11,376,5/1/17,follow up ,,Secretor
+11,347,5/16/17,follow up ,CGPLPA770P4,Secretor
+11,475,5/29/17,follow up ,,Secretor
+11,530,6/12/17,follow up ,CGPLPA770P5,Secretor
+11,1570,7/10/17,follow up ,CGPLPA770P6,Secretor
+12,935,3/2/17,Baseline,CGPLPA771P,Secretor
+12,2030,3/16/17,follow up ,CGPLPA771P1,Secretor
+12,1840,3/29/17,follow up ,,Secretor
+12,2290,4/11/17,follow up ,,Secretor
+12,4620,4/26/17,Endpoint,CGPLPA771P2,Secretor
+12,7130,5/10/17,follow up ,,Secretor
+12,17500,5/23/17,follow up ,,Secretor
+14,2340,3/22/17,Baseline,CGPLPA219P,Secretor
+14,2730,4/3/17,follow up ,,Secretor
+14,2090,4/18/17,follow up ,,Secretor
+14,1550,5/2/17,follow up ,,Secretor
+14,882,5/15/17,Endpoint,CGPLPA219P2,Secretor
+14,1240,5/29/17,follow up ,,Secretor
+14,2050,6/12/17,follow up ,,Secretor
+14,3360,6/26/17,follow up ,,Secretor
+14,4810,7/10/17,follow up ,CGPLPA219P3,Secretor
+14,6530,7/24/17,follow up ,,Secretor
+14,9840,8/21/17,follow up ,CGPLPA219P4,Secretor
+14,13200,9/4/17,follow up ,CGPLPA219P5,Secretor
+14,9680,9/18/17,follow up ,,Secretor
+14,11600,10/24/17,follow up ,CGPLPA219P6,Secretor
+15,12100,3/29/17,Baseline,CGPLPA223P,Secretor
+15,14800,4/10/17,follow up ,CGPLPA223P1,Secretor
+15,3100,4/26/17,follow up ,,Secretor
+15,532,5/10/17,follow up ,,Secretor
+15,187,5/24/17,Endpoint,CGPLPA223P2,Secretor
+15,89,6/8/17,follow up ,,Secretor
+15,54,6/22/17,follow up ,,Secretor
+15,39,7/6/17,follow up ,CGPLPA223P3,Secretor
+15,34,7/20/17,follow up ,,Secretor
+15,22,9/15/17,follow up ,,Secretor
+15,18,11/14/17,follow up ,CGPLPA223P5,Secretor
+15,17,1/11/18,follow up ,CGPLPA223P6,Secretor
+15,11.1,3/8/18,follow up ,CGPLPA223P7,Secretor
+15,12,5/8/18,follow up ,CGPLPA223P8,Secretor
+15,15,7/6/18,follow up ,CGPLPA223P9,Secretor
+15,13,9/5/18,follow up ,CGPLPA223P10,Secretor
+15,13,11/7/18,follow up ,CGPLPA223P11,Secretor
+15,15,1/15/19,follow up ,CGPLPA223P12,Secretor
+15,13,3/18/19,follow up ,CGPLPA223P13,Secretor
+15,13,6/17/19,follow up ,CGPLPA223P14,Secretor
+15,9,9/17/19,follow up ,CGPLPA223P15,Secretor
+15,9,12/20/19,follow up ,CGPLPA223P16,Secretor
+15,10,3/18/20,follow up ,CGPLPA223P17,Secretor
+15,8,9/21/20,follow up ,CGPLPA223P18,Secretor
+15,16,3/15/21,follow up ,,Secretor
+16,2320,5/10/17,Baseline,CGPLPA224P,Secretor
+16,3370,5/23/17,follow up ,CGPLPA224P1,Secretor
+16,1530,6/7/17,follow up ,,Secretor
+16,307,7/20/17,follow up ,,Secretor
+16,342,8/3/17,Endpoint,,Secretor
+16,173,9/6/17,follow up ,CGPLPA224P3,Secretor
+16,273,10/10/17,follow up ,CGPLPA224P4,Secretor
+16,2580,10/24/17,follow up ,CGPLPA224P5,Secretor
+16,286,11/27/17,follow up ,,Secretor
+16,408,12/11/17,follow up ,,Secretor
+16,501,12/27/17,follow up ,CGPLPA224P7,Secretor
+16,677,1/10/18,follow up ,,Secretor
+16,478,1/25/18,follow up ,,Secretor
+16,243,2/7/18,follow up ,CGPLPA224P8,Secretor
+16,235,2/21/18,follow up ,,Secretor
+16,223,3/7/18,follow up ,CGPLPA224P9,Secretor
+16,205,3/21/18,follow up ,,Secretor
+16,145,4/4/18,follow up ,CGPLPA224P10,Secretor
+16,165,4/19/18,follow up ,,Secretor
+16,169,5/2/18,follow up ,,Secretor
+16,152,5/30/18,follow up ,CGPLPA224P11,Secretor
+16,74,8/1/18,follow up ,CGPLPA224P12,Secretor
+16,72,9/26/18,follow up ,CGPLPA224P13,Secretor
+16,87,11/28/18,follow up ,CGPLPA224P14,Secretor
+16,90,1/23/19,follow up ,CGPLPA224P15,Secretor
+16,124,3/20/19,follow up ,CGPLPA224P16,Secretor
+16,308,5/15/19,follow up ,CGPLPA224P17,Secretor
+16,4370,7/18/19,follow up ,CGPLPA224P18,Secretor
+16,13000,8/22/19,follow up ,,Secretor
+16,779,9/16/19,follow up ,CGPLPA224P19,Secretor
+16,387,10/3/19,follow up ,CGPLPA224P20,Secretor
+16,278,10/16/19,follow up ,,Secretor
+16,49,12/4/19,follow up ,,Secretor
+16,56,12/18/19,follow up ,,Secretor
+16,32,1/2/20,follow up ,,Secretor
+16,48,1/15/20,follow up ,CGPLPA224P22,Secretor
+16,32,1/28/20,follow up ,,Secretor
+16,37,2/10/20,follow up ,,Secretor
+16,31,2/25/20,follow up ,,Secretor
+16,68,3/24/20,follow up ,CGPLPA224P23,Secretor
+16,499,9/16/20,follow up ,CGPLPA224P25,Secretor
+18,5120,5/22/17,Baseline,CGPLPA772P,Secretor
+18,6220,6/6/17,follow up ,CGPLPA772P1,Secretor
+18,5960,6/20/17,follow up ,,Secretor
+18,5210,7/5/17,follow up ,CGPLPA772P2,Secretor
+21,7970,6/28/17,Baseline,CGPLPA773P,Secretor
+21,8360,7/12/17,follow up ,CGPLPA773P1,Secretor
+21,7200,7/26/17,follow up ,,Secretor
+21,6360,8/9/17,follow up ,CGPLPA773P2,Secretor
+21,9890,8/23/17,Endpoint,,Secretor
+21,38500,9/20/17,follow up ,CGPLPA773P3,Secretor
+22,447,7/5/17,Baseline,CGPLPA774P,Secretor
+22,413,7/17/18,follow up ,CGPLPA774P1,Secretor
+22,517,7/31/17,follow up ,CGPLPA774P2,Secretor
+22,604,8/14/17,follow up ,,Secretor
+22,675,8/28/17,Endpoint,CGPLPA774P3,Secretor
+23,19700,8/16/17,Baseline,CGPLPA225P,Secretor
+23,25500,9/11/17,follow up ,,Secretor
+23,173,9/25/17,follow up ,,Secretor
+23,3100,10/11/17,Endpoint,CGPLPA225P1,Secretor
+26,505,10/23/17,follow up ,CGPLPA775P1,Secretor
+26,301,11/7/17,follow up ,,Secretor
+26,144,11/20/17,follow up ,CGPLPA775P2,Secretor
+26,162,12/4/17,Endpoint,,Secretor
+26,160,12/18/17,follow up ,,Secretor
+26,285,1/3/18,follow up ,,Secretor
+26,429,2/5/18,follow up ,,Secretor
+26,396,2/19/18,follow up ,,Secretor
+26,473,3/5/18,follow up ,CGPLPA775P4,Secretor
+30,1550,11/13/17,Baseline,CGPLPA222P,Secretor
+30,1350,11/29/17,follow up ,CGPLPA222P1,Secretor
+30,907,12/13/17,follow up ,,Secretor
+30,213,1/3/18,follow up ,CGPLPA222P2,Secretor
+30,166,2/1/18,Endpoint,,Secretor
+30,80,2/16/18,follow up ,,Secretor
+30,118,3/1/18,follow up ,,Secretor
+30,50,3/19/18,follow up ,,Secretor
+30,45,3/28/18,follow up ,,Secretor
+30,33,4/11/18,follow up ,,Secretor
+30,1460,4/25/18,follow up ,,Secretor
+30,197,5/9/18,follow up ,,Secretor
+30,67,5/23/18,follow up ,CGPLPA222P5,Secretor
+30,48,6/6/18,follow up ,,Secretor
+30,56,6/20/18,follow up ,,Secretor
+30,59,7/4/18,follow up ,,Secretor
+30,55,7/18/18,follow up ,,Secretor
+30,61,8/2/18,follow up ,,Secretor
+30,61,8/15/18,follow up ,,Secretor
+30,64,8/29/18,follow up ,,Secretor
+30,107,9/26/18,follow up ,,Secretor
+30,110,10/10/18,follow up ,,Secretor
+30,104,10/24/18,follow up ,,Secretor
+30,127,11/7/18,follow up ,,Secretor
+30,127,11/22/18,follow up ,,Secretor
+30,154,12/27/18,follow up ,CGPLPA222P8,Secretor
+30,107,2/26/19,follow up ,CGPLPA222P9,Secretor
+30,127,4/29/19,follow up ,,Secretor
+30,185,7/15/19,follow up ,CGPLPA222P11,Secretor
+30,601,11/18/19,follow up ,CGPLPA222P13,Secretor
+30,2350,2/19/20,follow up ,CGPLPA222P14,Secretor
+31,253,11/28/17,Baseline,,Secretor
+31,760,12/20/17,follow up ,CGPLPA776P1,Secretor
+31,2400,1/3/18,follow up ,,Secretor
+31,745,1/31/18,follow up ,,Secretor
+31,150,2/14/18,Endpoint,,Secretor
+31,103,2/28/18,follow up ,,Secretor
+31,103,3/14/18,follow up ,CGPLPA776P3,Secretor
+31,497,3/27/18,follow up ,,Secretor
+31,96,4/9/18,follow up ,,Secretor
+32,2050,1/29/18,Baseline,CGPLPA777P,Secretor
+32,2340,2/19/18,follow up ,CGPLPA777P1,Secretor
+32,3070,3/6/18,follow up ,,Secretor
+32,2980,3/19/18,follow up ,,Secretor
+32,5290,3/27/18,Endpoint,,Secretor
+34,4250,2/23/18,Baseline,CGPLPA778P,Secretor
+34,3720,3/14/18,follow up ,CGPLPA778P1,Secretor
+34,5580,3/26/18,follow up ,,Secretor
+34,3360,4/12/18,follow up ,,Secretor
+34,6910,4/25/18,Endpoint,CGPLPA778P2,Secretor
+34,9230,5/16/18,follow up ,,Secretor
+36,4140,3/5/18,Baseline,CGPLPA779P,Secretor
+36,4930,3/19/18,follow up ,CGPLPA779P1,Secretor
+36,9530,4/3/18,follow up ,,Secretor
+36,9690,4/11/18,follow up ,,Secretor
+36,26900,5/2/18,Endpoint,CGPLPA779P2,Secretor
+39,77800,3/1/18,Baseline,CGPLPA780P,Secretor
+39,152000,3/19/18,follow up ,CGPLPA780P1,Secretor
+39,163000,4/3/18,follow up ,,Secretor
+39,210000,4/17/18,follow up ,,Secretor
+39,320000,4/30/18,Endpoint,CGPLPA780P2,Secretor
+43,8300,3/8/18,Baseline,CGPLPA781P,Secretor
+43,10000,3/26/18,follow up ,CGPLPA781P1,Secretor
+43,12000,4/12/18,follow up ,,Secretor
+43,14700,4/26/18,follow up ,,Secretor
+43,15000,5/9/18,Endpoint,CGPLPA781P2,Secretor
+44,2290,4/23/18,Baseline,CGPLPA226P,Secretor
+44,3760,5/11/18,follow up ,CGPLPA226P1,Secretor
+44,2620,5/28/18,follow up ,,Secretor
+44,2010,6/11/18,follow up ,,Secretor
+44,2390,6/28/18,Endpoint,CGPLPA226P2,Secretor
+44,1560,7/17/18,follow up ,,Secretor
+44,1540,7/30/18,follow up ,,Secretor
+44,1250,8/13/18,follow up ,,Secretor
+44,1440,8/27/18,follow up ,CGPLPA226P3,Secretor
+44,1590,9/12/18,follow up ,,Secretor
+44,2960,9/26/18,follow up ,,Secretor
+44,3200,10/15/18,follow up ,,Secretor
+44,3860,10/29/18,follow up ,CGPLPA226P4,Secretor
+46,231,4/30/18,Baseline,,Secretor
+46,239,5/30/18,follow up ,CGPLPA782P1,Secretor
+46,177,6/13/18,follow up ,,Secretor
+46,151,6/26/18,follow up ,,Secretor
+46,146,7/9/18,Endpoint,,Secretor
+46,184,7/23/18,follow up ,,Secretor
+46,198,8/6/18,follow up ,,Secretor
+46,224,8/23/18,follow up ,,Secretor
+46,335,9/6/18,follow up ,CGPLPA782P2,Secretor
+46,300,9/27/18,follow up ,,Secretor
+46,372,10/11/18,follow up ,,Secretor
+46,572,10/25/18,follow up ,,Secretor
+46,839,11/8/18,follow up ,CGPLPA782P3,Secretor
+46,992,11/22/18,follow up ,,Secretor
+46,857,12/6/18,follow up ,,Secretor
+46,1010,12/21/18,follow up ,CGPLPA782P4,Secretor
+46,1130,1/11/19,follow up ,,Secretor
+46,1320,1/23/19,follow up ,,Secretor
+46,1450,2/8/19,follow up ,,Secretor
+46,1750,2/22/19,follow up ,,Secretor
+46,2230,3/4/19,follow up ,CGPLPA782P5,Secretor
+48,254000,5/29/18,Baseline,,Secretor
+48,77000,6/18/18,follow up ,CGPLPA783P1,Secretor
+48,225000,7/31/18,follow up ,CGPLPA783P2,Secretor
+52,338,8/8/18,Baseline,,Secretor
+52,1070,8/20/18,follow up ,CGPLPA784P1,Secretor
+52,5360,9/5/18,follow up ,,Secretor
+52,7690,9/19/18,follow up ,,Secretor
+52,15100,10/3/18,Endpoint,CGPLPA784P2,Secretor
+54,4840,8/28/18,Baseline,CGPLPA785P,Secretor
+54,4930,9/10/18,follow up ,CGPLPA785P1,Secretor
+54,6960,9/26/18,follow up ,,Secretor
+64,709,1/9/19,Baseline,CGPLPA786P,Secretor
+64,1020,1/30/19,follow up ,CGPLPA786P1,Secretor
+64,1750,2/13/19,follow up ,,Secretor
+64,2080,2/27/19,follow up ,,Secretor
+64,1910,3/19/19,Endpoint,CGPLPA786P2,Secretor
+64,2090,4/4/19,follow up ,,Secretor
+64,2340,4/24/19,follow up ,CGPLPA786P3,Secretor
+70,209,2/14/19,Baseline,,Secretor
+70,146,3/1/19,follow up ,,Secretor
+70,37,3/15/19,follow up ,,Secretor
+70,4,4/11/19,follow up ,,Secretor
+70,3,4/24/19,Endpoint,CGPLPA787P2,Secretor
+70,3,5/8/19,follow up ,CGPLPA787P3,Secretor
+70,3,5/22/19,follow up ,,Secretor
+70,3,6/5/19,follow up ,,Secretor
+70,3,6/20/19,follow up ,CGPLPA787P4,Secretor
+70,3,7/3/19,follow up ,,Secretor
+70,176,1/6/20,follow up ,CGPLPA787P10,Secretor
+70,120,1/22/20,follow up ,CGPLPA787P11,Secretor
+70,252,2/5/20,follow up ,,Secretor
+70,203,2/19/20,follow up ,,Secretor
+71,7770,2/22/19,Baseline,CGPLPA788P,Secretor
+71,5360,3/11/19,follow up ,CGPLPA788P1,Secretor
+71,4980,3/26/19,follow up ,,Secretor
+71,8730,4/8/19,follow up ,,Secretor
+71,11600,4/23/19,Endpoint,CGPLPA788P2,Secretor
+71,22400,5/6/19,follow up ,,Secretor
+71,55300,5/20/19,follow up ,,Secretor
+71,749000,6/3/19,follow up ,,Secretor
+71,206000,6/17/19,follow up ,CGPLPA788P3,Secretor
+83,456,5/29/19,Baseline,,Secretor
+83,580,6/13/19,follow up ,CGPLPA789P1,Secretor
+83,404,6/28/19,follow up ,,Secretor
+83,160,7/16/19,follow up ,,Secretor
+83,56,8/7/19,Endpoint,CGPLPA789P3,Secretor
+83,26,8/20/19,follow up ,,Secretor
+83,34,9/3/19,follow up ,,Secretor
+83,36,9/17/19,follow up ,,Secretor
+83,31,10/1/19,follow up ,CGPLPA789P4,Secretor
+83,50,10/15/19,follow up ,,Secretor
+83,174,10/30/19,follow up ,,Secretor
+83,318,11/12/19,follow up ,,Secretor
+83,477,11/27/19,follow up ,CGPLPA789P5,Secretor
+85,3,6/7/19,Baseline,,Nonsecretor
+85,3,6/24/19,follow up ,CGPLPA790P1,Nonsecretor
+85,1.5,7/8/19,follow up ,,Nonsecretor
+85,1.5,7/22/19,follow up ,,Nonsecretor
+85,1.5,8/5/19,Endpoint,CGPLPA790P2,Nonsecretor
+85,1.5,8/16/19,follow up ,,Nonsecretor
+85,1.6,9/13/19,follow up ,,Nonsecretor
+85,1.5,9/27/19,follow up ,,Nonsecretor
+85,1.5,10/11/19,follow up ,,Nonsecretor
+85,2.4,10/24/19,follow up ,,Nonsecretor
+85,6,11/7/19,follow up ,,Nonsecretor
+85,5.8,11/22/19,follow up ,,Nonsecretor
+94,8,7/25/19,Baseline,CGPLPA791P,Nonsecretor
+94,15,8/8/19,follow up ,CGPLPA791P1,Nonsecretor
+94,15,8/22/19,follow up ,,Nonsecretor
+94,11,9/4/19,follow up ,,Nonsecretor
+94,7,9/18/19,Endpoint,,Nonsecretor
+94,4,10/1/19,follow up ,,Nonsecretor
+97,914,8/20/19,Baseline,CGPLPA792P1,Secretor
+97,2560,9/18/19,follow up ,,Secretor
+98,6300,10/30/19,Baseline,,Secretor
+98,84300,11/20/19,follow up ,CGPLPA793P1,Secretor
+98,148000,12/4/19,follow up ,,Secretor
+98,568000,12/18/19,follow up ,,Secretor
+98,1118314,12/30/19,Endpoint,CGPLPA793P2,Secretor
+99,18,8/21/19,Baseline,CGPLPA794P,Nonsecretor
+99,32,9/11/19,follow up ,CGPLPA794P1,Nonsecretor
+99,28,9/25/19,follow up ,,Nonsecretor
+99,52,10/17/19,follow up ,CGPLPA794P2,Nonsecretor
+99,12,12/11/19,Endpoint,CGPLPA794P3,Nonsecretor
+1103,140,10/11/19,Baseline,CGPLPA795P,Secretor
+1103,201,10/24/19,follow up ,,Secretor
+1103,78,11/8/19,follow up ,,Secretor
+1103,114,11/26/19,follow up ,,Secretor
+1103,178,12/18/19,Endpoint,CGPLPA795P3,Secretor
+1103,244,1/3/20,follow up ,,Secretor
+1104,11,10/14/19,Baseline,CGPLPA796P,Nonsecretor
+1104,18,10/29/19,follow up ,CGPLPA796P1,Nonsecretor
+1104,29,11/13/19,follow up ,,Nonsecretor
+1104,17,12/13/19,follow up ,CGPLPA796P2,Nonsecretor
+1104,13,1/8/20,follow up ,,Nonsecretor
+1104,33,2/5/20,follow up ,,Nonsecretor
+1107,11700,11/28/19,Baseline,CGPLPA797P,Secretor
+1107,31100,1/6/20,follow up ,CGPLPA797P1,Secretor
+1107,24900,1/21/20,follow up ,,Secretor
+1107,10000,1/31/20,follow up ,,Secretor
+1107,10000,2/13/20,Endpoint,,Secretor
+1107,10000,2/28/20,follow up ,,Secretor
+1107,10000,3/13/20,follow up ,,Secretor

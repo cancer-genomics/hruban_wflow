@@ -1,0 +1,59 @@
+---
+title: CA19-9 was correlated with ARTEMIS-DELFI and WGMAF for patients in CheckPAC trial who were secretors
+---
+
+
+Scatter plots showing correlation of ARTEMIS-DELFI with CA19-9 on the left, and WGMAF with CA19-9 on the right. Patient samples for non-secretors are colored in red, while secretors are colored in blue.
+
+
+```{r packages, message = FALSE}
+library(tidyverse)
+library(ggpubr)
+library(readxl)
+library(here)
+library(cowplot)
+```
+
+
+```{r load_data}
+delfi_pred <- read_excel(here("data/supplementary_tables.xlsx"),
+                         sheet = "Table S2", range = "A2:N219")
+CA199 <- read_csv(here("data/CA199.csv"))
+```
+
+```{r ext-fig18,  fig.height=5, fig.width=13, dev = c("png", "pdf")}
+delfi_pred <- delfi_pred %>%
+  filter(WGMAF != "-")
+delfi_pred$`ARTEMIS-DELFI Score` <- as.numeric(delfi_pred$`ARTEMIS-DELFI Score`)
+delfi_pred$WGSMAF <- as.numeric(delfi_pred$WGMAF)
+delfi_pred <- inner_join(CA199, delfi_pred, by = "Sample")
+delfi_pred$ca199 <- as.numeric(delfi_pred$ca199)
+
+p <- vector("list", 2)
+
+p1 <- ggplot(delfi_pred, aes(x = ca199, y = `ARTEMIS-DELFI Score`,
+                       color = Secretor)) +
+  stat_cor(method = "pearson") +
+  geom_point() +
+  guides(color = guide_legend(override.aes = list(size = 2))) +
+  xlab("CA19-9") +
+  ylab("ARTEMIS-DELFI Score") +
+  scale_x_continuous(trans = "log10") +
+  scale_y_continuous(trans = "log10") +
+  theme_classic() +
+  theme(legend.title = element_blank())
+
+
+p2 <- ggplot(delfi_pred, aes(x = ca199, y = WGSMAF, color = Secretor))  +
+  stat_cor(method = "pearson") +
+  geom_point() +
+  guides(color = guide_legend(override.aes = list(size = 2))) +
+  xlab("CA19-9") +
+  ylab("WGMAF") +
+  scale_x_continuous(trans = "log10") +
+  scale_y_continuous(trans = "log10") +
+  theme_classic() +
+  theme(legend.title = element_blank())
+
+plot_grid(p1, p2, nrow = 1)
+```

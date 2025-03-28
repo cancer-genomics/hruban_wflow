@@ -1,0 +1,48 @@
+---
+title: WGMAF approach predicts survival for patients in CheckPAC trial
+---
+
+
+Kaplan-Meier Survival curves showing progression free survival probability and overall survival probability based on the median WGMAF value for CheckPAC patients at the second follow-up (on-treatment) plasma evaluation. Non-responders were classified as those with WGMAF above median value of 0.87%, while responders were classified as those with WGMAF below 0.87%.
+
+
+```{r packages, message = FALSE}
+library(ggpubr)
+library(here)
+library(lubridate)
+library(readxl)
+library(survival)
+library(survminer)
+library(tidyverse)
+```
+
+```{r WGSMAF, fig.height=5, fig.width=7}
+clean_data<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S1",range="A2:X45")
+wgsmaf_pred<-read_excel(here("data/supplementary_tables.xlsx"), sheet="Table S2",range="A2:N219")
+wgsmaf_pred<-wgsmaf_pred %>% filter(Patient!="CGPLPA796", Patient!="CGPLPA792", Patient!="CGPLPA791", Patient!="CGPLPA773", Patient!="CGPLPA779", Patient!="CGPLPA226", Patient!="CGPLPA222", Timepoint=="Endpoint", WGMAF!="-")
+
+wgsmaf_pred$WGSMAF<-as.numeric(wgsmaf_pred$WGMAF)
+WGSMAF_complete<-inner_join(wgsmaf_pred,clean_data, by="Patient")
+WGSMAF_complete<-WGSMAF_complete %>% mutate(cutoff1= ifelse(WGSMAF >=median(WGSMAF), "Nonresponder", "Responder"))
+WGSMAF_complete<-WGSMAF_complete %>% mutate(across('Death', str_replace, 'Yes', '1'))
+WGSMAF_complete<-WGSMAF_complete %>% mutate(across('Death', str_replace, 'No', '0'))
+WGSMAF_complete$`OS (days)`<-as.numeric(WGSMAF_complete$`OS (days)`)
+WGSMAF_complete$`PFS (days)`<-as.numeric(WGSMAF_complete$`PFS (days)`)
+WGSMAF_complete$Deceased<-as.numeric(WGSMAF_complete$Death)
+```
+
+```{r fig2c, fig.height = 5, fig.width = 7, dev = c("png", "pdf")}
+fit <- survfit(Surv(`OS (days)`, Deceased) ~ cutoff1, data=WGSMAF_complete)
+ggsurvplot(fit, pval = TRUE, risk.table = TRUE, risk.table.col = "strata", surv.median.line = "hv", title="", xlab="Time in Days", ylab="Overall survival probability", ggtheme = theme_classic2(base_size=11), legend = c(.9,.75), legend.title="", legend.labs=c("nonresponder","responder"), pval.size=3, pval.coord = c(1800, .25),tables.y.text = FALSE) 
+
+fit <- survfit(Surv(`PFS (days)`, Deceased) ~ cutoff1, data=WGSMAF_complete)
+ggsurvplot(fit, pval = TRUE, risk.table = TRUE, risk.table.col = "strata", surv.median.line = "hv", title="", ylab="Progression free survival probability", xlab="Time in Days", ggtheme = theme_classic2(base_size=11), legend = c(.9,.75), legend.title="", legend.labs=c("nonresponder","responder"), pval.size=3, pval.coord = c(1800, .25),tables.y.text = FALSE)
+```
+
+```{r summary}
+coxOS <- coxph(Surv(`OS (days)`, Deceased) ~ cutoff1, data = WGSMAF_complete)
+summary(coxOS)
+
+coxPFS <- coxph(Surv(`PFS (days)`, Deceased) ~ cutoff1, data = WGSMAF_complete)
+summary(coxPFS)
+```
